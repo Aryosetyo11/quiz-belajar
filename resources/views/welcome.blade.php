@@ -563,7 +563,7 @@
             <!-- Role Options -->
             <div class="space-y-3">
                 
-                <div class="rounded-xl border border-slate-200 bg-slate-50/60 p-4 transition hover:border-indigo-300">
+                <a href="{{ route('login.teacher') }}" class="block rounded-xl border border-slate-200 bg-slate-50/60 p-4 transition hover:border-indigo-300 focus:outline-none focus:ring-2 focus:ring-indigo-500">
                     <div class="flex items-center justify-between">
                         <div>
                             <h4 class="text-sm font-bold text-slate-900">Portal Pengajar (Guru)</h4>
@@ -571,9 +571,9 @@
                         </div>
                         <span class="rounded bg-indigo-50 px-2.5 py-1 text-[11px] font-semibold text-indigo-700">Akses Penuh</span>
                     </div>
-                </div>
+                </a>
 
-                <div class="rounded-xl border border-slate-200 bg-slate-50/60 p-4 transition hover:border-indigo-300">
+                <a href="{{ route('login.student') }}" class="block rounded-xl border border-slate-200 bg-slate-50/60 p-4 transition hover:border-indigo-300 focus:outline-none focus:ring-2 focus:ring-indigo-500">
                     <div class="flex items-center justify-between">
                         <div>
                             <h4 class="text-sm font-bold text-slate-900">Portal Siswa (Peserta)</h4>
@@ -581,13 +581,13 @@
                         </div>
                         <span class="rounded bg-slate-100 px-2.5 py-1 text-[11px] font-semibold text-slate-700">Peserta</span>
                     </div>
-                </div>
+                </a>
 
             </div>
 
             <!-- Status Notice -->
-            <div class="mt-5 rounded-lg bg-amber-50 border border-amber-200/80 p-3 text-xs text-amber-800 leading-relaxed">
-                <strong>Informasi:</strong> Saat ini halaman berada pada tahap landing page resmi. Ruang pengerjaan ujian dan autentikasi dashboard utama akan dibuka sesuai jadwal pelaksanaan ujian yayasan.
+            <div class="mt-5 rounded-lg bg-indigo-50 border border-indigo-200/80 p-3 text-xs text-indigo-800 leading-relaxed">
+                Pilih portal sesuai peran Anda. Guru masuk menggunakan email; siswa menggunakan NISN.
             </div>
 
             <div class="mt-5 flex justify-end">
