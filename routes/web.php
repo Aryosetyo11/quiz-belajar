@@ -1,11 +1,10 @@
 <?php
 
-use App\Http\Controllers\AuthenticatedSessionController;
+use App\Http\Controllers\Auth\AuthenticatedSessionController;
+use App\Http\Controllers\PortalDashboardController;
 use Illuminate\Support\Facades\Route;
 
-Route::get('/', function () {
-    return view('welcome');
-})->name('home');
+Route::view('/', 'home.index')->name('home');
 
 Route::middleware('guest')->group(function (): void {
     Route::get('/login', [AuthenticatedSessionController::class, 'showRoleSelection'])->name('login');
@@ -20,10 +19,10 @@ Route::middleware('guest')->group(function (): void {
 });
 
 Route::middleware('auth')->group(function (): void {
-    Route::get('/guru', [AuthenticatedSessionController::class, 'teacherDashboard'])
+    Route::get('/guru', [PortalDashboardController::class, 'teacher'])
         ->middleware('role:guru')
         ->name('teacher.dashboard');
-    Route::get('/siswa', [AuthenticatedSessionController::class, 'studentDashboard'])
+    Route::get('/siswa', [PortalDashboardController::class, 'student'])
         ->middleware('role:siswa')
         ->name('student.dashboard');
     Route::post('/logout', [AuthenticatedSessionController::class, 'destroy'])->name('logout');

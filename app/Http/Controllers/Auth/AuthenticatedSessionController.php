@@ -1,7 +1,8 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Auth;
 
+use App\Http\Controllers\Controller;
 use App\Models\User;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -41,16 +42,6 @@ class AuthenticatedSessionController extends Controller
     public function storeStudentLogin(Request $request): RedirectResponse
     {
         return $this->authenticate($request, User::ROLE_STUDENT, 'nisn');
-    }
-
-    public function teacherDashboard(): View
-    {
-        return view('portal.dashboard', ['role' => User::ROLE_TEACHER]);
-    }
-
-    public function studentDashboard(): View
-    {
-        return view('portal.dashboard', ['role' => User::ROLE_STUDENT]);
     }
 
     public function destroy(Request $request): RedirectResponse
