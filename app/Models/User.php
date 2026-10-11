@@ -7,6 +7,8 @@ use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Hidden;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 
@@ -40,5 +42,16 @@ class User extends Authenticatable
     public function dashboardRoute(): string
     {
         return $this->role === self::ROLE_TEACHER ? 'teacher.dashboard' : 'student.dashboard';
+    }
+
+    public function subjectsAsTeacher(): HasMany
+    {
+        return $this->hasMany(Subject::class, 'teacher_id');
+    }
+
+    public function enrolledSubjects(): BelongsToMany
+    {
+        return $this->belongsToMany(Subject::class, 'subject_student', 'student_id', 'subject_id')
+            ->withTimestamps();
     }
 }
