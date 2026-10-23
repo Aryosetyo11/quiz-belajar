@@ -1,21 +1,12 @@
-<section class="border-t border-zinc-200 bg-white py-20">
-    <div class="mx-auto max-w-3xl px-6 text-center">
-        <h2 class="text-3xl font-extrabold tracking-tight text-zinc-900 sm:text-4xl">
-            Mulai Sesi Evaluasi Belajar Digital
-        </h2>
-        <p class="mt-4 text-[15.5px] text-zinc-500 leading-[1.75] max-w-xl mx-auto">
-            Akses portal ujian RuangUji untuk pengajar dan peserta didik di lingkungan Yayasan NC Learning Center.
-        </p>
-        <div class="mt-8 flex flex-col sm:flex-row items-center justify-center gap-3">
-            <button type="button" class="open-portal-btn inline-flex items-center gap-2.5 rounded-xl bg-indigo-600 px-7 py-3.5 text-[14px] font-semibold text-white shadow-md shadow-indigo-600/25 transition-all hover:bg-indigo-700 hover:shadow-lg hover:shadow-indigo-600/30 hover:-translate-y-px cursor-pointer">
-                <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1" />
-                </svg>
-                Masuk Portal Ujian
-            </button>
-            <a href="#keunggulan" class="text-[13.5px] font-medium text-zinc-500 hover:text-zinc-800 transition-colors">
-                Pelajari lebih lanjut →
-            </a>
+<section class="relative overflow-hidden border-t border-indigo-100 bg-gradient-to-r from-indigo-50 via-white to-amber-50 py-16 sm:py-20">
+    <div class="pointer-events-none absolute -right-24 -top-32 h-80 w-80 rounded-full bg-indigo-200/40 blur-3xl"></div>
+    <div class="relative mx-auto max-w-3xl px-6 text-center" data-reveal>
+        <span class="label-eyebrow">RuangUji · NC Learning Center</span>
+        <h2 class="mt-4 text-3xl font-extrabold tracking-tight text-zinc-950 sm:text-4xl">Satu portal untuk kegiatan evaluasi belajar</h2>
+        <p class="mx-auto mt-4 max-w-xl text-base leading-7 text-zinc-600">Pilih portal sesuai peran Anda dan lanjutkan ke RuangUji.</p>
+        <div class="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row">
+            <button type="button" class="open-portal-btn inline-flex items-center gap-2 rounded-xl bg-indigo-700 px-7 py-3.5 text-sm font-bold text-white shadow-lg shadow-indigo-700/20 transition hover:-translate-y-0.5 hover:bg-indigo-800 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-indigo-200">Pilih portal masuk <span aria-hidden="true">&rarr;</span></button>
+            <a href="#keunggulan" class="rounded-xl px-5 py-3.5 text-sm font-semibold text-zinc-600 transition hover:bg-white hover:text-indigo-800">Kenali RuangUji</a>
         </div>
     </div>
 </section>

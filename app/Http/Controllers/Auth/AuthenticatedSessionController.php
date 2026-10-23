@@ -34,6 +34,16 @@ class AuthenticatedSessionController extends Controller
         return $this->showLoginForm(User::ROLE_STUDENT);
     }
 
+    public function showAdminLogin(): View|RedirectResponse
+    {
+        return $this->showLoginForm(User::ROLE_ADMIN_REMOTE);
+    }
+
+    public function showFoundationLogin(): View|RedirectResponse
+    {
+        return $this->showLoginForm(User::ROLE_ADMIN_FOUNDATION);
+    }
+
     public function storeTeacherLogin(Request $request): RedirectResponse
     {
         return $this->authenticate($request, User::ROLE_TEACHER, 'email');
@@ -42,6 +52,16 @@ class AuthenticatedSessionController extends Controller
     public function storeStudentLogin(Request $request): RedirectResponse
     {
         return $this->authenticate($request, User::ROLE_STUDENT, 'nisn');
+    }
+
+    public function storeAdminLogin(Request $request): RedirectResponse
+    {
+        return $this->authenticate($request, User::ROLE_ADMIN_REMOTE, 'email');
+    }
+
+    public function storeFoundationLogin(Request $request): RedirectResponse
+    {
+        return $this->authenticate($request, User::ROLE_ADMIN_FOUNDATION, 'email');
     }
 
     public function destroy(Request $request): RedirectResponse

@@ -1,13 +1,13 @@
-<section id="profil" class="border-t border-zinc-200 bg-white py-16 sm:py-20">
+<section id="profil" class="border-t border-amber-100 bg-gradient-to-b from-amber-50/55 via-white to-white py-16 sm:py-20">
     <div class="mx-auto max-w-6xl px-6">
 
-        <div class="mb-8 max-w-2xl">
+        <div class="mb-8 max-w-2xl" data-reveal>
             <p class="label-eyebrow">Tentang mitra</p>
             <h2 class="mt-3 text-2xl font-bold tracking-tight text-zinc-900 sm:text-3xl">Tempat RuangUji digunakan</h2>
             <p class="mt-3 text-sm leading-6 text-zinc-500">RuangUji dirancang bersama Yayasan NC Learning Center untuk mendukung proses evaluasi yang lebih rapi dan terukur.</p>
         </div>
 
-        <div class="group overflow-hidden rounded-2xl border border-zinc-200 bg-zinc-50/70 shadow-sm transition duration-300 ease-out hover:-translate-y-1 hover:border-zinc-300 hover:shadow-lg hover:shadow-zinc-900/5">
+        <div class="group overflow-hidden rounded-2xl border border-zinc-200 bg-zinc-50/70 shadow-sm transition duration-300 ease-out hover:-translate-y-1 hover:border-zinc-300 hover:shadow-lg hover:shadow-zinc-900/5" data-reveal>
             <div class="grid lg:grid-cols-12 hover:scale-100 transition-transform duration-300">
 
                 <div class="flex flex-col justify-center p-6 sm:p-9 lg:col-span-7">

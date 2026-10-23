@@ -14,6 +14,7 @@ class SubjectMaterialDownloadController extends Controller
     public function __invoke(Request $request, Subject $subject, SubjectMaterial $material): StreamedResponse
     {
         abort_unless((int) $material->subject_id === $subject->id, 404);
+        abort_unless(! $material->isVideo(), 404);
 
         $user = $request->user();
         $isTeacher = $user->role === User::ROLE_TEACHER

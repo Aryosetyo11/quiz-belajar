@@ -4,9 +4,38 @@
 
 - Guru masuk melalui `/login/guru` memakai email dan kata sandi.
 - Siswa masuk melalui `/login/siswa` memakai NISN 10 digit dan kata sandi.
-- `/guru` dan `/siswa` hanya dapat dibuka oleh pengguna dengan role yang cocok.
-- Registrasi publik tidak tersedia. Administrator yayasan membuat dan membagikan akun.
-- Dashboard sudah menjadi titik awal portal. Fitur bank soal, sesi ujian, dan pengerjaan kuis belum termasuk implementasi ini.
+- Manajemen All Remote masuk melalui `/login/admin`; Manajemen Yayasan masuk melalui `/login/yayasan`. Keduanya memakai email dan kata sandi.
+- Empat role portal: Guru, Siswa, Manajemen All Remote, dan Manajemen Yayasan. All Remote mengelola akun; Yayasan melihat ringkasan siswa, guru, kelas, materi, serta pendaftaran.
+- Registrasi publik tidak tersedia. Admin All Remote membuat dan membagikan akun.
+- Guru dapat menambahkan materi dokumen atau video melalui tautan YouTube/Vimeo. Video diputar langsung di halaman materi siswa tanpa mengunggah file video ke server.
+- Guru dapat membuat sesi ujian manual atau mengimpor soal pilihan ganda dari Excel `.xlsx` dan PDF berbasis teks. Soal hasil impor dapat diperiksa dan diubah sebelum disimpan.
+- Siswa yang terdaftar pada mata pelajaran dapat mengerjakan ujian yang dipublikasikan satu kali. Nilai pilihan ganda dihitung otomatis.
+- PDF hasil scan, OCR, soal esai, bank soal terpisah, pemantauan langsung, serta edit atau hapus ujian belum didukung.
+
+## Ujian dan format impor
+
+Migrasi ujian ada pada tiga file `2026_10_23_085637_create_exams_table.php`, `2026_10_23_085638_create_exam_questions_table.php`, dan `2026_10_23_085639_create_exam_attempts_table.php`. Jalankan dengan `php artisan migrate` setelah mengatur MySQL. Tabel berisi ujian, pilihan ganda, dan percobaan siswa; kunci jawaban hanya digunakan server saat menghitung nilai.
+
+Format Excel memakai lembar pertama dengan baris pertama sebagai header:
+
+| Pertanyaan | A | B | C | D | Kunci | Poin |
+|---|---|---|---|---|---|---|
+| Hasil 2 + 2 adalah? | 3 | 4 | 5 | 6 | B | 1 |
+
+Header dapat memakai nama `Question`, `Pertanyaan`, atau `Soal`; pilihan harus tersedia untuk A sampai D; `Kunci` harus berisi A, B, C, atau D. Kolom `Poin` opsional dan bernilai 1 jika kosong. Batas unggahan 10 MB dan 100 soal per ujian.
+
+PDF harus memuat teks yang dapat diekstrak dengan pola seperti berikut:
+
+```text
+1. Hasil 2 + 2 adalah?
+A. 3
+B. 4
+C. 5
+D. 6
+Kunci: B
+```
+
+Ekstraksi PDF mendukung PDF teks sederhana. Hasil scan atau font PDF dengan encoding khusus memerlukan OCR atau konversi ke Excel dan belum akan terbaca.
 
 ## Konfigurasi MySQL
 
@@ -36,7 +65,7 @@ php artisan migrate --force
 
 Migrasi Laravel ada di `database/migrations/2026_09_30_103012_add_portal_identity_to_users_table.php`. Alternatif skrip khusus MySQL tersedia di `docs/portal-mysql-migration.sql`; gunakan salah satu cara migrasi, jangan keduanya. Skrip SQL tersebut dijalankan setelah tabel `users` bawaan Laravel dibuat.
 
-Kolom `email` dibuat nullable agar akun siswa cukup memakai NISN. Email tetap unik untuk guru, NISN unik dan berukuran tetap 10 karakter, dan role MySQL dibatasi pada `guru` atau `siswa`. Baris akun lama diberi role default `siswa`; akun lama tanpa NISN belum dapat masuk sebagai siswa sampai administrator mengisi NISN.
+Kolom `email` dibuat nullable agar akun siswa cukup memakai NISN. Email tetap unik untuk akun non-siswa, NISN unik dan berukuran tetap 10 karakter. Role disimpan di kolom teks supaya menerima empat role; migrasi split memindahkan role lama `admin` ke `admin_yayasan`.
 
 ## Membuat akun dengan password yang di-hash
 
@@ -84,6 +113,8 @@ Di lingkungan `local` atau `testing`, jalankan `php artisan migrate` lalu `php a
 | Guru | `guru001@yayasan.nclearning` | `GuruDemo!2026` |
 | Siswa 1 | NISN `0000000001` | `SiswaDemo01!2026` |
 | Siswa 2 | NISN `0000000002` | `SiswaDemo02!2026` |
+| Manajemen All Remote | `remote@yayasan.nclearning` | `AdminDemo!2026` |
+| Manajemen Yayasan | `admin@yayasan.nclearning` | `AdminDemo!2026` |
 
 Setiap password tetap di-hash oleh model `User` sebelum disimpan.
 

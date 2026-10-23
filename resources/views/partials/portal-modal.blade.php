@@ -13,7 +13,7 @@
         </div>
 
         <!-- Role Options -->
-        <div class="space-y-3">
+        <div class="grid gap-3 sm:grid-cols-2">
 
             <a href="{{ route('login.teacher') }}" class="group block rounded-xl border border-slate-200 p-4 transition hover:border-indigo-300 hover:bg-indigo-50/40 focus:outline-none focus:ring-2 focus:ring-indigo-500">
                 <div class="flex items-center justify-between">
@@ -33,6 +33,20 @@
                     </div>
                     <span class="text-sm font-medium text-indigo-700" aria-hidden="true">&rarr;</span>
                 </div>
+            </a>
+
+            <a href="{{ route('login.admin') }}" class="group block rounded-xl border border-amber-200 bg-amber-50/50 p-4 transition hover:border-amber-300 hover:bg-amber-50 focus:outline-none focus:ring-2 focus:ring-amber-500">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <h4 class="text-sm font-semibold text-slate-900 group-hover:text-amber-800">Manajemen All Remote</h4>
+                        <p class="mt-1 text-sm text-slate-600">Kelola akses akun seluruh portal.</p>
+                    </div>
+                    <span class="text-sm font-medium text-amber-800" aria-hidden="true">&rarr;</span>
+                </div>
+            </a>
+
+            <a href="{{ route('login.foundation') }}" class="group block rounded-xl border border-orange-200 bg-orange-50/60 p-4 transition hover:border-orange-300 hover:bg-orange-50 focus:outline-none focus:ring-2 focus:ring-orange-500">
+                <div class="flex items-center justify-between"><div><h4 class="text-sm font-semibold text-slate-900 group-hover:text-orange-800">Manajemen Yayasan</h4><p class="mt-1 text-sm text-slate-600">Pantau statistik siswa, guru, dan aktivitas.</p></div><span class="text-sm font-medium text-orange-800" aria-hidden="true">&rarr;</span></div>
             </a>
 
         </div>

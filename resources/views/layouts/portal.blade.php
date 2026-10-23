@@ -9,8 +9,12 @@
 </head>
 <body class="min-h-screen bg-stone-50 font-sans text-slate-900 antialiased">
     @php
-        $isTeacher = auth()->user()->role === \App\Models\User::ROLE_TEACHER;
-        $portalLabel = $isTeacher ? 'Pengajar' : 'Siswa';
+        $portalLabel = match (auth()->user()->role) {
+            \App\Models\User::ROLE_TEACHER => 'Pengajar',
+            \App\Models\User::ROLE_STUDENT => 'Siswa',
+            \App\Models\User::ROLE_ADMIN_REMOTE => 'Manajemen All Remote',
+            \App\Models\User::ROLE_ADMIN_FOUNDATION => 'Manajemen Yayasan',
+        };
     @endphp
 
     <div class="min-h-screen lg:grid lg:grid-cols-[248px_minmax(0,1fr)]">

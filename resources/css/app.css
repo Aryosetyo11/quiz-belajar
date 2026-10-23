@@ -30,6 +30,7 @@
 
 html {
     scroll-behavior: smooth;
+    scroll-padding-top: 5rem;
 }
 
 /* ── Global base ── */
@@ -58,5 +59,114 @@ body {
     background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23n)' opacity='0.035'/%3E%3C/svg%3E");
     pointer-events: none;
     z-index: 0;
+}
+
+/* Motion on the public landing page */
+.motion-ready [data-reveal] {
+    opacity: 0;
+    transform: translateY(22px);
+    transition: opacity 700ms ease, transform 700ms cubic-bezier(0.2, 0.75, 0.25, 1);
+    transition-delay: var(--reveal-delay, 0ms);
+}
+
+.motion-ready [data-reveal].is-visible {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.motion-float {
+    animation: ru-float 6s ease-in-out infinite;
+    transform-origin: center;
+}
+
+.motion-glow {
+    animation: ru-glow-drift 14s ease-in-out infinite alternate;
+}
+
+.demo-answer {
+    transition: border-color 180ms ease, background-color 180ms ease, color 180ms ease, transform 180ms ease;
+}
+
+.demo-answer:hover {
+    transform: translateY(-1px);
+}
+
+.demo-answer.is-selected {
+    border-color: #a5b4fc;
+    background-color: #eef2ff;
+    color: #312e81;
+}
+
+.demo-answer.is-selected .answer-indicator {
+    border-color: #4f46e5;
+    background: #4f46e5;
+    color: #fff;
+}
+
+.nav-link {
+    position: relative;
+    padding-block: 0.35rem;
+}
+
+.nav-link::after {
+    position: absolute;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    height: 2px;
+    border-radius: 999px;
+    background: #4f46e5;
+    content: '';
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform 220ms ease;
+}
+
+.nav-link:hover::after,
+.nav-link:focus-visible::after {
+    transform: scaleX(1);
+}
+
+#portal-modal:not(.hidden) {
+    animation: ru-backdrop-in 220ms ease-out both;
+}
+
+#portal-modal:not(.hidden) > div {
+    animation: ru-dialog-in 300ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+
+@keyframes ru-float {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-9px); }
+}
+
+@keyframes ru-glow-drift {
+    from { transform: translate3d(0, 0, 0) scale(1); }
+    to { transform: translate3d(-28px, 22px, 0) scale(1.08); }
+}
+
+@keyframes ru-backdrop-in {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@keyframes ru-dialog-in {
+    from { opacity: 0; transform: translateY(14px) scale(0.98); }
+    to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    html {
+        scroll-behavior: auto;
+    }
+
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        scroll-behavior: auto !important;
+        transition-duration: 0.01ms !important;
+    }
 }
 

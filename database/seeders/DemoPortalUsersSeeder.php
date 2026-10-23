@@ -28,6 +28,26 @@ class DemoPortalUsersSeeder extends Seeder
         );
 
         User::firstOrCreate(
+            ['email' => 'remote@yayasan.nclearning'],
+            [
+                'name' => 'Manajemen All Remote Demo',
+                'role' => User::ROLE_ADMIN_REMOTE,
+                'nisn' => null,
+                'password' => 'AdminDemo!2026',
+            ],
+        );
+
+        User::firstOrCreate(
+            ['email' => 'admin@yayasan.nclearning'],
+            [
+                'name' => 'Manajemen Yayasan Demo',
+                'role' => User::ROLE_ADMIN_FOUNDATION,
+                'nisn' => null,
+                'password' => 'AdminDemo!2026',
+            ],
+        );
+
+        User::firstOrCreate(
             ['nisn' => '0000000001'],
             [
                 'name' => 'Siswa Demo 1',

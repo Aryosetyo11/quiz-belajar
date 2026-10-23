@@ -20,6 +20,10 @@ class User extends Authenticatable
 
     public const ROLE_STUDENT = 'siswa';
 
+    public const ROLE_ADMIN_REMOTE = 'admin_remote';
+
+    public const ROLE_ADMIN_FOUNDATION = 'admin_yayasan';
+
     /** @use HasFactory<UserFactory> */
     use HasFactory, Notifiable;
 
@@ -41,7 +45,13 @@ class User extends Authenticatable
      */
     public function dashboardRoute(): string
     {
-        return $this->role === self::ROLE_TEACHER ? 'teacher.dashboard' : 'student.dashboard';
+        return match ($this->role) {
+            self::ROLE_TEACHER => 'teacher.dashboard',
+            self::ROLE_STUDENT => 'student.dashboard',
+            self::ROLE_ADMIN_REMOTE => 'remote.dashboard',
+            self::ROLE_ADMIN_FOUNDATION => 'foundation.dashboard',
+            default => throw new \LogicException('Akun tidak memiliki peran portal yang valid.'),
+        };
     }
 
     public function subjectsAsTeacher(): HasMany

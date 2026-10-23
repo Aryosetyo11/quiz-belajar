@@ -17,10 +17,10 @@
 
         <!-- Nav -->
         <nav class="hidden md:flex items-center gap-7 text-[13.5px] font-medium text-zinc-500" aria-label="Menu Utama">
-            <a href="#keunggulan" class="transition-colors hover:text-zinc-900">Keunggulan</a>
-            <a href="#keamanan" class="transition-colors hover:text-zinc-900">Keamanan</a>
-            <a href="#peran" class="transition-colors hover:text-zinc-900">Akses Pengguna</a>
-            <a href="#profil" class="transition-colors hover:text-zinc-900">Tentang</a>
+            <a href="#keunggulan" class="nav-link transition-colors hover:text-zinc-900">Keunggulan</a>
+            <a href="#keamanan" class="nav-link transition-colors hover:text-zinc-900">Keamanan</a>
+            <a href="#peran" class="nav-link transition-colors hover:text-zinc-900">Akses Pengguna</a>
+            <a href="#profil" class="nav-link transition-colors hover:text-zinc-900">Tentang</a>
         </nav>
 
         <!-- CTA -->

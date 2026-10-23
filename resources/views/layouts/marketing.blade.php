@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="RuangUji - Sistem Informasi Ujian Digital Berbasis Web Yayasan NC Learning Center dengan Proteksi Real-Time dan Manajemen Akses Terstruktur.">
-    <title>RuangUji | Sistem Ujian Digital Yayasan NC Learning Center</title>
+    <meta name="description" content="RuangUji adalah portal kuis dan ujian digital NC Learning Center untuk guru, siswa, dan pengelola.">
+    <title>RuangUji | Portal Kuis dan Ujian Digital</title>
 
     <!-- Google Fonts: Plus Jakarta Sans -->
     <link rel="preconnect" href="https://fonts.googleapis.com">

@@ -2,7 +2,7 @@
 -- Existing user rows receive the safe default role "siswa" and no NISN.
 ALTER TABLE `users`
     MODIFY `email` VARCHAR(255) NULL,
-    ADD `role` ENUM('guru', 'siswa') NOT NULL DEFAULT 'siswa' AFTER `email_verified_at`,
+    ADD `role` VARCHAR(20) NOT NULL DEFAULT 'siswa' AFTER `email_verified_at`,
     ADD `nisn` CHAR(10) NULL AFTER `role`,
     ADD INDEX `users_role_index` (`role`),
     ADD UNIQUE INDEX `users_nisn_unique` (`nisn`);

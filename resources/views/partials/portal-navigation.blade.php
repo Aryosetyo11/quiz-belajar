@@ -1,4 +1,6 @@
 @php
+    $isAdmin = in_array(auth()->user()->role, [\App\Models\User::ROLE_ADMIN_REMOTE, \App\Models\User::ROLE_ADMIN_FOUNDATION], true);
+    $isFoundationAdmin = auth()->user()->role === \App\Models\User::ROLE_ADMIN_FOUNDATION;
     $isTeacher = auth()->user()->role === \App\Models\User::ROLE_TEACHER;
 @endphp
 
@@ -7,26 +9,30 @@
         <h2 class="px-3 text-sm font-semibold uppercase tracking-[0.08em] text-slate-500">Menu utama</h2>
         <ul class="mt-3 space-y-1.5">
             <li>
-                <a href="{{ route(auth()->user()->dashboardRoute()) }}" @class(['flex items-center gap-3 rounded-lg px-3 py-3 text-base font-medium transition', 'bg-indigo-50 text-indigo-800' => request()->routeIs('teacher.dashboard', 'student.dashboard'), 'text-slate-600 hover:bg-slate-50 hover:text-slate-950' => ! request()->routeIs('teacher.dashboard', 'student.dashboard')])>
+                <a href="{{ route(auth()->user()->dashboardRoute()) }}" @class(['flex items-center gap-3 rounded-lg px-3 py-3 text-base font-medium transition', 'bg-indigo-50 text-indigo-800' => request()->routeIs('teacher.dashboard', 'student.dashboard', 'remote.dashboard', 'foundation.dashboard'), 'text-slate-600 hover:bg-slate-50 hover:text-slate-950' => ! request()->routeIs('teacher.dashboard', 'student.dashboard', 'remote.dashboard', 'foundation.dashboard')])>
                     <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M3 10.5 12 3l9 7.5M5.5 9v11h13V9M9 20v-6h6v6" /></svg>
                     Dashboard
                 </a>
             </li>
 
             @php
-                $modules = $isTeacher
+                $modules = $isAdmin
+                    ? [
+                        ...($isFoundationAdmin ? [] : [['Manajemen akun', 'admin.users', false]]),
+                    ]
+                    : ($isTeacher
                     ? [
                         ['Mata pelajaran', 'teacher.subjects', false],
                         ['Bank soal', 'teacher.question-bank', true],
-                        ['Sesi ujian', 'teacher.exam-sessions', true],
+                        ['Sesi ujian', 'teacher.exam-sessions', false],
                         ['Pemantauan', 'teacher.monitoring', true],
                         ['Hasil penilaian', 'teacher.results', true],
                     ]
                     : [
                         ['Mata pelajaran', 'student.subjects', false],
-                        ['Ujian saya', 'student.exams', true],
+                        ['Ujian saya', 'student.exams', false],
                         ['Hasil belajar', 'student.results', true],
-                    ];
+                    ]);
             @endphp
 
             @foreach ($modules as [$label, $routeName, $comingSoon])

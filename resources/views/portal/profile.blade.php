@@ -5,9 +5,10 @@
 @section('content')
     @php
         $user = auth()->user();
-        $loginIdentifier = $user->role === \App\Models\User::ROLE_TEACHER ? $user->email : $user->nisn;
-        $identifierLabel = $user->role === \App\Models\User::ROLE_TEACHER ? 'Email masuk' : 'NISN';
-        $roleLabel = $user->role === \App\Models\User::ROLE_TEACHER ? 'Pengajar' : 'Siswa';
+        $isStudent = $user->role === \App\Models\User::ROLE_STUDENT;
+        $loginIdentifier = $isStudent ? $user->nisn : $user->email;
+        $identifierLabel = $isStudent ? 'NISN' : 'Email masuk';
+        $roleLabel = ['guru' => 'Pengajar', 'siswa' => 'Siswa', 'admin_remote' => 'Manajemen All Remote', 'admin_yayasan' => 'Manajemen Yayasan'][$user->role];
     @endphp
 
     <div class="max-w-3xl">

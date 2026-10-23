@@ -3,7 +3,7 @@
 @section('title', 'Masuk Portal | RuangUji')
 
 @section('content')
-<div class="mx-auto max-w-2xl">
+<div class="mx-auto max-w-4xl">
     @include('partials.portal-brand')
 
     <section class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-[0_12px_40px_-32px_rgba(15,23,42,0.28)]">
@@ -13,7 +13,7 @@
             <p class="mt-2 max-w-lg text-sm leading-6 text-slate-600">Pilih jenis akun yang terdaftar untuk melanjutkan.</p>
         </div>
 
-        <div class="grid gap-3 px-4 pb-4 sm:grid-cols-2 sm:px-8 sm:pb-8">
+        <div class="grid gap-3 px-4 pb-4 sm:grid-cols-2 sm:px-8 sm:pb-8 lg:grid-cols-3">
             <a href="{{ route('login.teacher') }}" class="group flex min-h-36 flex-col rounded-xl border border-slate-200 p-5 transition duration-200 hover:border-indigo-300 hover:bg-slate-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-600 focus-visible:ring-offset-2">
                 <span class="flex h-9 w-9 items-center justify-center rounded-lg bg-slate-100 text-slate-700 transition-colors group-hover:bg-indigo-50 group-hover:text-indigo-700">
                     <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
@@ -27,6 +27,26 @@
                     </span>
                     <span class="text-lg text-slate-400 transition group-hover:translate-x-0.5 group-hover:text-indigo-700" aria-hidden="true">&rarr;</span>
                 </span>
+            </a>
+
+            <a href="{{ route('login.admin') }}" class="group flex min-h-36 flex-col rounded-xl border border-violet-200 bg-violet-50/50 p-5 transition duration-200 hover:border-violet-300 hover:bg-violet-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-violet-600 focus-visible:ring-offset-2">
+                    <span class="flex h-9 w-9 items-center justify-center rounded-lg bg-violet-100 text-violet-800 transition-colors group-hover:bg-violet-200">
+                    <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 3 4.5 6v5c0 4.8 3.2 8.2 7.5 10 4.3-1.8 7.5-5.2 7.5-10V6L12 3Zm-3 9 2 2 4-4" />
+                    </svg>
+                </span>
+                <span class="mt-4 flex items-center justify-between gap-4">
+                    <span>
+                        <span class="block text-base font-semibold text-slate-900">Manajemen All Remote</span>
+                        <span class="mt-1 block text-sm leading-5 text-slate-600">Kelola akses akun seluruh portal dari jarak jauh.</span>
+                    </span>
+                    <span class="text-lg text-violet-700 transition group-hover:translate-x-0.5" aria-hidden="true">&rarr;</span>
+                </span>
+            </a>
+
+            <a href="{{ route('login.foundation') }}" class="group flex min-h-36 flex-col rounded-xl border border-amber-200 bg-amber-50/60 p-5 transition duration-200 hover:border-amber-300 hover:bg-amber-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-600 focus-visible:ring-offset-2">
+                <span class="flex h-9 w-9 items-center justify-center rounded-lg bg-amber-100 text-amber-800">✦</span>
+                <span class="mt-4 flex items-center justify-between gap-4"><span><span class="block text-base font-semibold text-slate-900">Manajemen Yayasan</span><span class="mt-1 block text-sm leading-5 text-slate-600">Pantau jumlah siswa, guru, dan aktivitas belajar.</span></span><span class="text-lg text-amber-700" aria-hidden="true">&rarr;</span></span>
             </a>
 
             <a href="{{ route('login.student') }}" class="group flex min-h-36 flex-col rounded-xl border border-slate-200 p-5 transition duration-200 hover:border-indigo-300 hover:bg-slate-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-600 focus-visible:ring-offset-2">
