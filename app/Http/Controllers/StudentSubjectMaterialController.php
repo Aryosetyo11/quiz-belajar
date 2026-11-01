@@ -12,7 +12,7 @@ class StudentSubjectMaterialController extends Controller
     {
         $subject = $request->user()->enrolledSubjects()
             ->where('subjects.id', $subject->id)
-            ->with('teacher:id,name')
+            ->with(['teacher:id,name', 'classroom:id,name,academic_year', 'schedules'])
             ->firstOrFail();
 
         return view('portal.student-materials', [

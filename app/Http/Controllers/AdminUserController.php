@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\School;
 use App\Models\User;
 use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Builder;
@@ -19,10 +20,14 @@ class AdminUserController extends Controller
         $filters = $request->validate([
             'q' => ['nullable', 'string', 'max:100'],
             'role' => ['nullable', Rule::in([User::ROLE_TEACHER, User::ROLE_STUDENT, User::ROLE_ADMIN_REMOTE, User::ROLE_ADMIN_FOUNDATION])],
+            'school_id' => ['nullable', 'integer', 'exists:schools,id'],
+            'attention' => ['nullable', Rule::in(['students_without_subject', 'teachers_without_subject'])],
         ]);
 
         $users = User::query()
+            ->with('school:id,name')
             ->when($filters['role'] ?? null, fn (Builder $query, string $role) => $query->where('role', $role))
+            ->when($filters['school_id'] ?? null, fn (Builder $query, int $schoolId) => $query->where('school_id', $schoolId))
             ->when($filters['q'] ?? null, function (Builder $query, string $term): void {
                 $query->where(function (Builder $query) use ($term): void {
                     $query->where('name', 'like', "%{$term}%")
@@ -30,11 +35,23 @@ class AdminUserController extends Controller
                         ->orWhere('nisn', 'like', "%{$term}%");
                 });
             })
+            ->when($filters['attention'] ?? null, function (Builder $query, string $attention): void {
+                if ($attention === 'students_without_subject') {
+                    $query->where('role', User::ROLE_STUDENT)->whereDoesntHave('enrolledSubjects');
+                }
+
+                if ($attention === 'teachers_without_subject') {
+                    $query->where('role', User::ROLE_TEACHER)->whereDoesntHave('subjectsAsTeacher');
+                }
+            })
             ->orderBy('name')
             ->paginate(12)
             ->withQueryString();
 
-        return view('portal.admin-users', ['users' => $users]);
+        return view('portal.admin-users', [
+            'users' => $users,
+            'schools' => School::query()->where('is_active', true)->orderBy('name')->get(['id', 'name']),
+        ]);
     }
 
     public function store(Request $request): RedirectResponse
@@ -42,6 +59,7 @@ class AdminUserController extends Controller
         $validated = $request->validate([
             'name' => ['required', 'string', 'max:255'],
             'role' => ['required', Rule::in([User::ROLE_TEACHER, User::ROLE_STUDENT, User::ROLE_ADMIN_REMOTE, User::ROLE_ADMIN_FOUNDATION])],
+            'school_id' => [Rule::requiredIf(fn (): bool => in_array($request->input('role'), [User::ROLE_TEACHER, User::ROLE_STUDENT], true)), 'nullable', 'integer', Rule::exists('schools', 'id')->where('is_active', true)],
             'email' => [Rule::requiredIf(fn (): bool => $request->input('role') !== User::ROLE_STUDENT), 'nullable', 'email', 'max:255', 'unique:users,email'],
             'nisn' => [Rule::requiredIf(fn (): bool => $request->input('role') === User::ROLE_STUDENT), 'nullable', 'digits:10', 'unique:users,nisn'],
             'password' => ['required', 'confirmed', Password::min(12)->mixedCase()->letters()->numbers()],
@@ -50,6 +68,7 @@ class AdminUserController extends Controller
         User::query()->create([
             'name' => $validated['name'],
             'role' => $validated['role'],
+            'school_id' => in_array($validated['role'], [User::ROLE_TEACHER, User::ROLE_STUDENT], true) ? $validated['school_id'] : null,
             'email' => $validated['email'] ?? null,
             'nisn' => $validated['nisn'] ?? null,
             'password' => $validated['password'],
@@ -61,15 +80,29 @@ class AdminUserController extends Controller
     public function update(Request $request, User $user): RedirectResponse
     {
         $isStudent = $user->role === User::ROLE_STUDENT;
+        $isSchoolMember = in_array($user->role, [User::ROLE_STUDENT, User::ROLE_TEACHER], true);
         $validated = $request->validate([
             'name' => ['required', 'string', 'max:255'],
+            'school_id' => [Rule::excludeIf(! $isSchoolMember), Rule::requiredIf($isSchoolMember), 'nullable', 'integer', Rule::exists('schools', 'id')->where('is_active', true)],
             'email' => [Rule::excludeIf($isStudent), Rule::requiredIf(! $isStudent), 'nullable', 'email', 'max:255', Rule::unique('users', 'email')->ignore($user)],
             'nisn' => [Rule::excludeIf(! $isStudent), Rule::requiredIf($isStudent), 'nullable', 'digits:10', Rule::unique('users', 'nisn')->ignore($user)],
             'password' => ['nullable', 'confirmed', Password::min(12)->mixedCase()->letters()->numbers()],
         ]);
 
+        $requestedSchoolId = (int) ($validated['school_id'] ?? 0);
+        if ($isSchoolMember && $requestedSchoolId !== (int) $user->school_id) {
+            if ($isStudent && ($user->classrooms()->exists() || $user->enrolledSubjects()->exists())) {
+                throw ValidationException::withMessages(['school_id' => 'Keluarkan siswa dari semua rombel sebelum memindahkan sekolahnya.']);
+            }
+
+            if (! $isStudent && $user->subjectsAsTeacher()->exists()) {
+                throw ValidationException::withMessages(['school_id' => 'Pindahkan penugasan mapel ke guru lain sebelum memindahkan sekolah pengajar ini.']);
+            }
+        }
+
         $user->forceFill([
             'name' => $validated['name'],
+            'school_id' => $isSchoolMember ? $requestedSchoolId : null,
             'email' => $user->role === User::ROLE_STUDENT ? null : $validated['email'],
             'nisn' => $user->role === User::ROLE_STUDENT ? $validated['nisn'] : null,
         ]);

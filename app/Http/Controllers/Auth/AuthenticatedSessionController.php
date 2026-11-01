@@ -15,13 +15,13 @@ class AuthenticatedSessionController extends Controller
 {
     private const DUMMY_PASSWORD_HASH = '$2y$12$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi';
 
-    public function showRoleSelection(): View|RedirectResponse
+    public function redirectToStudentLogin(): RedirectResponse
     {
         if (Auth::check()) {
             return redirect()->route(Auth::user()->dashboardRoute());
         }
 
-        return view('auth.choose-role');
+        return redirect()->route('login.student');
     }
 
     public function showTeacherLogin(): View|RedirectResponse
@@ -73,12 +73,8 @@ class AuthenticatedSessionController extends Controller
         return redirect()->route('home');
     }
 
-    private function showLoginForm(string $role): View|RedirectResponse
+    private function showLoginForm(string $role): View
     {
-        if (Auth::check()) {
-            return redirect()->route(Auth::user()->dashboardRoute());
-        }
-
         return view('auth.login', ['role' => $role]);
     }
 
@@ -123,6 +119,6 @@ class AuthenticatedSessionController extends Controller
         Auth::login($user);
         $request->session()->regenerate();
 
-        return redirect()->intended(route($user->dashboardRoute()));
+        return redirect()->route($user->dashboardRoute());
     }
 }

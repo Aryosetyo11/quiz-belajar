@@ -16,11 +16,7 @@
     @include('partials.portal-brand')
 
     <section class="rounded-2xl border border-slate-200 bg-white p-6 shadow-[0_12px_40px_-32px_rgba(15,23,42,0.28)] sm:p-8">
-        <a href="{{ route('login') }}" class="inline-flex items-center gap-1 text-sm font-medium text-slate-600 transition hover:text-indigo-700">
-            <span aria-hidden="true">&larr;</span> Pilih portal
-        </a>
-
-        <div class="mt-7">
+        <div>
             <p class="text-sm font-medium text-indigo-700">Portal {{ $portalLabel }}</p>
             <h1 class="mt-2 text-2xl font-semibold tracking-tight text-slate-950">Masuk ke akun Anda</h1>
             <p class="mt-2 text-sm leading-6 text-slate-600">Gunakan {{ strtolower($identifierLabel) }} dan kata sandi yang terdaftar.</p>

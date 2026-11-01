@@ -7,6 +7,7 @@
     @include('home.sections.security')
     @include('home.sections.roles')
     @include('home.sections.organization')
+    @include('home.sections.faq')
     @include('home.sections.call-to-action')
 </main>
 @endsection

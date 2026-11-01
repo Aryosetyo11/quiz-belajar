@@ -11,8 +11,13 @@ class StudentSubjectController extends Controller
     {
         $subjects = $request->user()
             ->enrolledSubjects()
-            ->with('teacher:id,name')
-            ->withCount('materials')
+            ->with(['teacher:id,name', 'classroom:id,name,academic_year', 'schedules'])
+            ->withCount([
+                'materials',
+                'materials as documents_count' => fn ($query) => $query->where('type', 'file'),
+                'materials as videos_count' => fn ($query) => $query->where('type', 'video'),
+                'materials as links_count' => fn ($query) => $query->where('type', 'link'),
+            ])
             ->orderBy('subjects.name')
             ->get();
 

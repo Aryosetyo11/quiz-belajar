@@ -1,68 +1,100 @@
 @extends('layouts.portal')
 
-@section('title', 'Buat Ujian | RuangUji')
+@section('title', 'Buat Sesi Ujian | RuangUji')
 
 @section('content')
     <header>
         <a href="{{ route('teacher.exam-sessions') }}" class="text-sm font-semibold text-indigo-700 hover:text-indigo-900">← Kembali ke sesi ujian</a>
-        <p class="mt-5 text-sm font-semibold uppercase tracking-[0.1em] text-indigo-700">Pembuatan evaluasi</p>
-        <h1 class="mt-2 text-3xl font-semibold tracking-tight text-slate-950 sm:text-4xl">Buat ujian</h1>
-        <p class="mt-3 max-w-2xl text-base leading-7 text-slate-600">Impor file berisi soal dan kunci untuk mengisi formulir otomatis, atau tulis soal pilihan ganda secara manual.</p>
+        <p class="mt-5 text-sm font-semibold uppercase tracking-[0.1em] text-indigo-700">Evaluasi pembelajaran</p>
+        <h1 class="mt-2 text-3xl font-semibold tracking-tight text-slate-950 sm:text-4xl">Buat sesi ujian</h1>
+        <p class="mt-3 max-w-2xl text-base leading-7 text-slate-600">Pilih mapel dan paket soalnya, lalu tentukan jumlah soal. Satu sesi terhubung ke satu mapel agar jadwal dan hasilnya tercatat dengan benar.</p>
     </header>
 
-    @if (session('status'))
-        <div class="mt-6 rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-3 text-base text-emerald-800" role="status">{{ session('status') }}</div>
-    @endif
     @if ($errors->any())
-        <div class="mt-6 rounded-lg border border-rose-200 bg-rose-50 px-4 py-3 text-base text-rose-800" role="alert">{{ $errors->first() }}</div>
+        <div class="mt-6 rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-800" role="alert">{{ $errors->first() }}</div>
     @endif
 
-    <section class="mt-8 rounded-xl border border-indigo-100 bg-indigo-50/70 p-5 sm:p-6" aria-labelledby="import-heading">
-        <h2 id="import-heading" class="text-lg font-semibold text-slate-950">Impor soal dari file</h2>
-        <p class="mt-1 text-sm leading-6 text-slate-600">Pilih PDF berbasis teks atau Excel .xlsx. Soal akan ditampilkan untuk diperiksa sebelum disimpan.</p>
-        <form method="POST" action="{{ route('teacher.exam-sessions.import') }}" enctype="multipart/form-data" class="mt-4 flex flex-col gap-3 sm:flex-row sm:items-end">
-            @csrf
-            <div class="flex-1"><label for="import-file" class="mb-2 block text-sm font-medium text-slate-800">File soal (maks. 10 MB)</label><input id="import-file" name="file" type="file" accept=".pdf,.xlsx,application/pdf,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" required class="block w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm text-slate-700"></div>
-            <button type="submit" class="rounded-lg border border-indigo-700 px-4 py-2.5 text-sm font-semibold text-indigo-800 transition hover:bg-white">Baca dan tampilkan soal</button>
-        </form>
-        <details class="mt-4 text-sm text-slate-700">
-            <summary class="cursor-pointer font-semibold">Lihat format file yang didukung</summary>
-            <div class="mt-3 space-y-2 leading-6">
-                <p><strong>Excel:</strong> baris pertama berisi header <code>Pertanyaan, A, B, C, D, Kunci, Poin</code>. Kolom Poin opsional. Data soal dimulai dari baris kedua.</p>
-                <p><strong>PDF:</strong> susun tiap soal sebagai nomor, pertanyaan, pilihan A–D, lalu <code>Kunci: B</code>. PDF hasil scan dan soal esai belum didukung.</p>
-            </div>
-        </details>
-    </section>
-
-    @if ($subjects->isEmpty())
-        <p class="mt-8 rounded-xl border border-amber-200 bg-amber-50 p-5 text-base text-amber-900">Anda belum memiliki mata pelajaran. <a href="{{ route('teacher.subjects') }}" class="font-semibold underline">Buat mata pelajaran</a> sebelum menyusun ujian.</p>
+    @if ($bankPackages->isEmpty())
+        <section class="mt-8 rounded-2xl border border-dashed border-slate-300 bg-white p-8 text-center">
+            <h2 class="text-xl font-semibold text-slate-950">Bank Soal masih kosong</h2>
+            <p class="mx-auto mt-2 max-w-xl text-base leading-7 text-slate-600">Buat paket dan tambahkan soal terlebih dahulu. Setelah itu, paket tersebut bisa dipakai berulang kali untuk sesi ujian.</p>
+            <a href="{{ route('teacher.question-bank') }}" class="mt-5 inline-flex rounded-lg bg-indigo-700 px-4 py-2.5 text-sm font-semibold text-white hover:bg-indigo-800">Buka Bank Soal</a>
+        </section>
     @else
-        <form id="exam-form" method="POST" action="{{ route('teacher.exam-sessions.store') }}" class="mt-8 space-y-6">
+        <form method="POST" action="{{ route('teacher.exam-sessions.store') }}" class="mt-8 space-y-6">
             @csrf
-            <section class="rounded-xl border border-slate-200 bg-white p-5 sm:p-6">
-                <h2 class="text-lg font-semibold text-slate-950">Informasi ujian</h2>
-                <div class="mt-5 grid gap-4 sm:grid-cols-2">
-                    <div class="sm:col-span-2"><label for="subject-id" class="mb-2 block text-sm font-medium text-slate-800">Mata pelajaran</label><select id="subject-id" name="subject_id" required class="block w-full rounded-lg border border-slate-300 px-3.5 py-2.5 text-base"><option value="">Pilih mata pelajaran</option>@foreach ($subjects as $subject)<option value="{{ $subject->id }}" @selected(old('subject_id') == $subject->id)>{{ $subject->name }}</option>@endforeach</select></div>
-                    <div class="sm:col-span-2"><label for="exam-title" class="mb-2 block text-sm font-medium text-slate-800">Judul ujian</label><input id="exam-title" name="title" value="{{ old('title') }}" required maxlength="160" class="block w-full rounded-lg border border-slate-300 px-3.5 py-2.5 text-base" placeholder="Contoh: Ujian Bab 1"></div>
-                    <div class="sm:col-span-2"><label for="description" class="mb-2 block text-sm font-medium text-slate-800">Petunjuk <span class="font-normal text-slate-500">(opsional)</span></label><textarea id="description" name="description" rows="2" maxlength="2000" class="block w-full rounded-lg border border-slate-300 px-3.5 py-2.5 text-base">{{ old('description') }}</textarea></div>
-                    <div><label for="duration" class="mb-2 block text-sm font-medium text-slate-800">Durasi (menit)</label><input id="duration" type="number" name="duration_minutes" value="{{ old('duration_minutes', 60) }}" min="1" max="300" required class="block w-full rounded-lg border border-slate-300 px-3.5 py-2.5 text-base"></div>
-                    <div class="flex items-center gap-3 pt-7"><input id="published" type="checkbox" name="is_published" value="1" @checked(old('is_published')) class="h-4 w-4 rounded border-slate-300 text-indigo-700"><label for="published" class="text-sm font-medium text-slate-800">Publikasikan agar siswa dapat mengerjakan</label></div>
-                    <div><label for="starts-at" class="mb-2 block text-sm font-medium text-slate-800">Waktu mulai <span class="font-normal text-slate-500">(opsional)</span></label><input id="starts-at" type="datetime-local" name="starts_at" value="{{ old('starts_at') }}" class="block w-full rounded-lg border border-slate-300 px-3.5 py-2.5 text-base"></div>
-                    <div><label for="ends-at" class="mb-2 block text-sm font-medium text-slate-800">Waktu berakhir <span class="font-normal text-slate-500">(opsional)</span></label><input id="ends-at" type="datetime-local" name="ends_at" value="{{ old('ends_at') }}" class="block w-full rounded-lg border border-slate-300 px-3.5 py-2.5 text-base"></div>
+            <section class="rounded-2xl border border-slate-200 bg-white p-5 sm:p-7">
+                <h2 class="text-xl font-semibold text-slate-950">Sumber soal dan jumlah</h2>
+                <p class="mt-1 text-sm leading-6 text-slate-600">Jika mengampu beberapa mapel, buat satu sesi untuk masing-masing mapel. Jumlah esai akan sama untuk semua peserta dalam sesi tersebut.</p>
+
+                <div class="mt-5 grid gap-5 sm:grid-cols-2">
+                    <div class="sm:col-span-2">
+                        <label for="exam-subject" class="mb-2 block text-sm font-semibold text-slate-800">Mata pelajaran</label>
+                        <select id="exam-subject" name="subject_id" required data-exam-subject-select class="block w-full rounded-lg border border-slate-300 px-3.5 py-3 text-base text-slate-900">
+                            <option value="">Pilih mata pelajaran</option>
+                            @foreach ($subjects as $subject)
+                                <option value="{{ $subject->id }}" @selected($selectedSubjectId === $subject->id)>
+                                    {{ $subject->name }} · {{ $subject->school?->name ?? 'Sekolah' }} / {{ $subject->classroom?->name ?? 'Rombel' }} ({{ $subject->classroom?->academic_year ?? 'Tahun ajaran' }})
+                                </option>
+                            @endforeach
+                        </select>
+                    </div>
+                    <div class="sm:col-span-2">
+                        <label for="bank-package" class="mb-2 block text-sm font-semibold text-slate-800">Paket Bank Soal</label>
+                        <select id="bank-package" name="bank_package_id" required data-exam-package-select data-old-package="{{ old('bank_package_id') }}" class="block w-full rounded-lg border border-slate-300 px-3.5 py-3 text-base text-slate-900" @disabled($selectedSubjectId === null)>
+                            <option value="">{{ $selectedSubjectId === null ? 'Pilih mapel terlebih dahulu' : 'Pilih paket soal' }}</option>
+                            @foreach ($bankPackages as $package)
+                                <option value="{{ $package->id }}" data-subject-id="{{ $package->subject_id }}" @selected(old('bank_package_id') == $package->id && $selectedSubjectId === $package->subject_id) @disabled($selectedSubjectId !== null && $selectedSubjectId !== $package->subject_id) @if ($selectedSubjectId !== null && $selectedSubjectId !== $package->subject_id) hidden @endif>
+                                    {{ $package->title }} ({{ $package->questions_count }} soal: {{ $package->multiple_choice_questions_count }} PG, {{ $package->essay_questions_count }} esai)
+                                </option>
+                            @endforeach
+                        </select>
+                        <p class="mt-2 text-sm text-slate-500">Paket hanya menampilkan soal dari mapel yang dipilih.</p>
+                    </div>
+                    <div>
+                        <label for="question-count" class="mb-2 block text-sm font-semibold text-slate-800">Jumlah soal yang diujikan</label>
+                        <input id="question-count" type="number" name="question_count" value="{{ old('question_count', 20) }}" min="1" max="100" required class="block w-full rounded-lg border border-slate-300 px-3.5 py-3 text-base text-slate-900">
+                    </div>
+                    <div>
+                        <label for="essay-count" class="mb-2 block text-sm font-semibold text-slate-800">Jumlah soal esai</label>
+                        <input id="essay-count" type="number" name="essay_question_count" value="{{ old('essay_question_count', 0) }}" min="0" max="100" required class="block w-full rounded-lg border border-slate-300 px-3.5 py-3 text-base text-slate-900">
+                    </div>
+                </div>
+                <div class="mt-5 rounded-xl bg-indigo-50 px-4 py-3 text-sm leading-6 text-indigo-950">
+                    Contoh: isi <strong>20 soal</strong> dan <strong>3 esai</strong>. Sistem memilih 17 PG dan 3 esai secara acak untuk setiap siswa.
                 </div>
             </section>
 
-            <section class="rounded-xl border border-slate-200 bg-white p-5 sm:p-6" data-exam-authoring>
-                <div class="flex flex-wrap items-center justify-between gap-3">
-                    <div><h2 class="text-lg font-semibold text-slate-950">Daftar soal</h2><p class="mt-1 text-sm text-slate-600">Pilihan ganda A–D, nilai maksimal 100 poin per soal.</p></div>
-                    <button type="button" data-add-question class="rounded-lg border border-slate-300 px-3.5 py-2.5 text-sm font-semibold text-slate-700 hover:bg-slate-50">+ Tambah soal</button>
+            <section class="rounded-2xl border border-slate-200 bg-white p-5 sm:p-7">
+                <h2 class="text-xl font-semibold text-slate-950">Pengaturan ujian</h2>
+                <div class="mt-5 grid gap-5 sm:grid-cols-2">
+                    <div class="sm:col-span-2">
+                        <label for="exam-title" class="mb-2 block text-sm font-semibold text-slate-800">Nama sesi ujian</label>
+                        <input id="exam-title" name="title" value="{{ old('title') }}" required maxlength="160" class="block w-full rounded-lg border border-slate-300 px-3.5 py-3 text-base" placeholder="Contoh: Ujian Tengah Semester">
+                    </div>
+                    <div class="sm:col-span-2">
+                        <label for="description" class="mb-2 block text-sm font-semibold text-slate-800">Petunjuk untuk siswa <span class="font-normal text-slate-500">(opsional)</span></label>
+                        <textarea id="description" name="description" rows="3" maxlength="2000" class="block w-full rounded-lg border border-slate-300 px-3.5 py-3 text-base">{{ old('description') }}</textarea>
+                    </div>
+                    <div>
+                        <label for="duration" class="mb-2 block text-sm font-semibold text-slate-800">Durasi (menit)</label>
+                        <input id="duration" type="number" name="duration_minutes" value="{{ old('duration_minutes', 60) }}" min="1" max="300" required class="block w-full rounded-lg border border-slate-300 px-3.5 py-3 text-base">
+                    </div>
+                    <div class="grid gap-4 sm:grid-cols-2">
+                        <div><label for="starts-at" class="mb-2 block text-sm font-semibold text-slate-800">Mulai <span class="font-normal text-slate-500">(opsional)</span></label><input id="starts-at" type="datetime-local" name="starts_at" value="{{ old('starts_at') }}" class="block w-full rounded-lg border border-slate-300 px-3 py-3 text-sm"></div>
+                        <div><label for="ends-at" class="mb-2 block text-sm font-semibold text-slate-800">Berakhir <span class="font-normal text-slate-500">(opsional)</span></label><input id="ends-at" type="datetime-local" name="ends_at" value="{{ old('ends_at') }}" class="block w-full rounded-lg border border-slate-300 px-3 py-3 text-sm"></div>
+                    </div>
+                    <div class="sm:col-span-2 rounded-xl border border-slate-200 p-4">
+                        <label class="flex items-center gap-3 text-sm font-semibold text-slate-900"><input type="checkbox" name="enable_proctoring" value="1" @checked(old('enable_proctoring', true)) class="h-4 w-4 rounded border-slate-300 text-indigo-700">Aktifkan pemantauan anti-kecurangan</label>
+                        <div class="mt-3 flex items-center gap-3"><label for="max-violations" class="text-sm text-slate-700">Batas pelanggaran</label><input id="max-violations" type="number" name="max_violations" value="{{ old('max_violations', 3) }}" min="1" max="10" class="w-20 rounded-lg border border-slate-300 px-2.5 py-1.5 text-sm"><span class="text-sm text-slate-500">sebelum jawaban dikumpulkan otomatis</span></div>
+                    </div>
+                    <label class="sm:col-span-2 flex items-center gap-3 rounded-xl bg-emerald-50 p-4 text-sm font-semibold text-emerald-950"><input type="checkbox" name="is_published" value="1" @checked(old('is_published')) class="h-4 w-4 rounded border-slate-300 text-indigo-700">Publikasikan sekarang agar siswa bisa mengerjakan</label>
                 </div>
-                <input type="hidden" id="questions-json" name="questions_json" value="">
-                <p data-question-error class="mt-4 text-sm text-rose-700" role="alert"></p>
-                <div data-question-list class="mt-4 space-y-4"></div>
-                <script type="application/json" data-imported-questions>{{ Illuminate\Support\Js::encode(old('questions_json') ? json_decode(old('questions_json'), true) : $importedQuestions) }}</script>
             </section>
-            <button type="submit" class="w-full rounded-lg bg-indigo-700 px-5 py-3.5 text-base font-semibold text-white transition hover:bg-indigo-800 sm:w-auto">Simpan ujian</button>
+
+            <div class="flex justify-end">
+                <button type="submit" class="rounded-xl bg-indigo-700 px-5 py-3 text-base font-semibold text-white transition hover:bg-indigo-800">Simpan sesi ujian</button>
+            </div>
         </form>
     @endif
 @endsection

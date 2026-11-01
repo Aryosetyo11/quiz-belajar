@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="RuangUji adalah portal kuis dan ujian digital NC Learning Center untuk guru, siswa, dan pengelola.">
-    <title>RuangUji | Portal Kuis dan Ujian Digital</title>
+    <meta name="description" content="RuangUji menghubungkan materi kelas, ujian digital, dan hasil belajar untuk siswa, guru, sekolah, dan Yayasan NC Learning Center.">
+    <title>RuangUji | Portal Belajar dan Ujian Digital</title>
 
     <!-- Google Fonts: Plus Jakarta Sans -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -18,7 +18,6 @@
 
     @yield('content')
 
-    @include('partials.portal-modal')
     @include('partials.marketing-footer')
 </body>
 </html>

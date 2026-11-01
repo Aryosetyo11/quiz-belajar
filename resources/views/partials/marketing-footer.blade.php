@@ -13,7 +13,7 @@
             </div>
 
             <p class="text-center sm:text-right">
-                &copy; {{ date('Y') }} Yayasan NC Learning Center. Dikembangkan bersama Sutopo Group.
+                &copy; {{ date('Y') }} Yayasan NC Learning Center.
             </p>
         </div>
     </div>

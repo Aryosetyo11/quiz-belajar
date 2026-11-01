@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
-#[Fillable(['title', 'description', 'type', 'video_url', 'file_path', 'original_file_name', 'file_size'])]
+#[Fillable(['title', 'description', 'type', 'video_url', 'external_url', 'file_path', 'original_file_name', 'file_size'])]
 class SubjectMaterial extends Model
 {
     public function isVideo(): bool
@@ -44,6 +44,67 @@ class SubjectMaterial extends Model
         return $host === 'player.vimeo.com'
             ? 'https://'.$host.'/'.$path
             : 'https://'.$host.'/embed/'.$videoId;
+    }
+
+    public function isExternalLink(): bool
+    {
+        return $this->type === 'link';
+    }
+
+    public function isPdf(): bool
+    {
+        return ! $this->isVideo()
+            && ! $this->isExternalLink()
+            && strtolower(pathinfo((string) $this->original_file_name, PATHINFO_EXTENSION)) === 'pdf';
+    }
+
+    public function externalEmbedUrl(): ?string
+    {
+        if (! $this->isExternalLink() || ! is_string($this->external_url)) {
+            return null;
+        }
+
+        $host = strtolower((string) parse_url($this->external_url, PHP_URL_HOST));
+        $path = (string) parse_url($this->external_url, PHP_URL_PATH);
+
+        if ($host === 'drive.google.com') {
+            $videoId = null;
+
+            if (preg_match('#^/file/d/([A-Za-z0-9_-]+)(?:/|$)#', $path, $matches) === 1) {
+                $videoId = $matches[1];
+            } else {
+                parse_str((string) parse_url($this->external_url, PHP_URL_QUERY), $query);
+                $videoId = $query['id'] ?? null;
+            }
+
+            return is_string($videoId) && preg_match('/^[A-Za-z0-9_-]+$/', $videoId) === 1
+                ? 'https://drive.google.com/file/d/'.$videoId.'/preview'
+                : null;
+        }
+
+        if ($host === 'docs.google.com'
+            && preg_match('#^/presentation/d/([A-Za-z0-9_-]+)(?:/|$)#', $path, $matches) === 1) {
+            return 'https://docs.google.com/presentation/d/'.$matches[1].'/embed?start=false&loop=false&delayms=3000';
+        }
+
+        return null;
+    }
+
+    public function canvaDesignId(): ?string
+    {
+        if (! $this->isExternalLink() || ! is_string($this->external_url)) {
+            return null;
+        }
+
+        $host = strtolower((string) parse_url($this->external_url, PHP_URL_HOST));
+        $path = (string) parse_url($this->external_url, PHP_URL_PATH);
+
+        if (! in_array($host, ['canva.com', 'www.canva.com'], true)
+            || preg_match('#^/design/([A-Za-z0-9_-]+)(?:/|$)#', $path, $matches) !== 1) {
+            return null;
+        }
+
+        return $matches[1];
     }
 
     public function subject(): BelongsTo

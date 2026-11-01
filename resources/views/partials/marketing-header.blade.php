@@ -21,16 +21,17 @@
             <a href="#keamanan" class="nav-link transition-colors hover:text-zinc-900">Keamanan</a>
             <a href="#peran" class="nav-link transition-colors hover:text-zinc-900">Akses Pengguna</a>
             <a href="#profil" class="nav-link transition-colors hover:text-zinc-900">Tentang</a>
+            <a href="#faq" class="nav-link transition-colors hover:text-zinc-900">FAQ</a>
         </nav>
 
         <!-- CTA -->
         <div class="hidden sm:flex items-center gap-2.5">
-            <button type="button" class="open-portal-btn inline-flex items-center gap-2 rounded-xl bg-indigo-600 px-4 py-2.5 text-[13px] font-semibold text-white shadow-sm shadow-indigo-600/20 transition-all hover:bg-indigo-700 hover:shadow-md hover:shadow-indigo-600/25 cursor-pointer">
+            <a href="{{ route('login.student') }}" class="inline-flex items-center gap-2 rounded-xl bg-indigo-600 px-4 py-2.5 text-[13px] font-semibold text-white shadow-sm shadow-indigo-600/20 transition-all hover:bg-indigo-700 hover:shadow-md hover:shadow-indigo-600/25">
                 <svg class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1" />
                 </svg>
                 Masuk Portal
-            </button>
+            </a>
         </div>
 
         <!-- Mobile toggle -->
@@ -48,10 +49,11 @@
             <a href="#keamanan" class="hover:text-zinc-900">Keamanan</a>
             <a href="#peran" class="hover:text-zinc-900">Akses Pengguna</a>
             <a href="#profil" class="hover:text-zinc-900">Tentang</a>
+            <a href="#faq" class="hover:text-zinc-900">FAQ</a>
             <div class="pt-3 border-t border-zinc-100">
-                <button type="button" class="open-portal-btn w-full rounded-xl bg-indigo-600 py-3 text-center text-[13px] font-semibold text-white shadow-sm hover:bg-indigo-700">
+                <a href="{{ route('login.student') }}" class="block w-full rounded-xl bg-indigo-600 py-3 text-center text-[13px] font-semibold text-white shadow-sm hover:bg-indigo-700">
                     Masuk Portal Ujian
-                </button>
+                </a>
             </div>
         </div>
     </div>
