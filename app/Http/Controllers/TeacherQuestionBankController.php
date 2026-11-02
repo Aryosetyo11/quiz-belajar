@@ -13,6 +13,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\View\View;
 use RuntimeException;
+use Symfony\Component\HttpFoundation\BinaryFileResponse;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class TeacherQuestionBankController extends Controller
@@ -291,7 +292,7 @@ class TeacherQuestionBankController extends Controller
 
         $extension = strtolower((string) $validated['file']->getClientOriginalExtension());
         if (! in_array($extension, ['xlsx', 'csv', 'txt', 'pdf'], true)) {
-            return back()->withErrors(['file' => 'Format file tidak didukung. Harap unggah file .xlsx, .csv, atau .pdf.'])->withInput();
+            return back()->withErrors(['file' => 'Format file tidak didukung. Harap unggah file .xlsx, .csv, .txt, atau .pdf.'])->withInput();
         }
 
         try {
@@ -500,63 +501,14 @@ class TeacherQuestionBankController extends Controller
         ]);
     }
 
-    /**
-     * Unduh Contoh Format File Soal PDF / Dokumen Teks.
-     */
-    public function downloadPdfExample(): StreamedResponse
+    /** Unduh template PDF yang dapat digunakan sebagai contoh impor. */
+    public function downloadPdfExample(): BinaryFileResponse
     {
-        $filename = 'contoh-format-soal-dokumen.txt';
+        $filePath = public_path('templates/template-impor-bank-soal.pdf');
+        abort_unless(is_file($filePath), 404);
 
-        return response()->streamDownload(function (): void {
-            $content = <<<'TXT'
-========================================================================
-CONTOH FORMAT PENULISAN SOAL UNTUK FILE DOKUMEN / PDF
-========================================================================
-
-Petunjuk Penulisan:
-1. Tulis nomor soal diikuti titik atau kurung tutup: 1. atau 1)
-2. Tulis pertanyaan di bawah atau samping nomor.
-3. Tulis pilihan A, B, C, D dengan jelas.
-4. Tulis kunci jawaban dengan format "Kunci: [A/B/C/D]" di akhir butir soal.
-
-------------------------------------------------------------------------
-CONTOH FORMAT SOAL PILIHAN GANDA (PG):
-------------------------------------------------------------------------
-
-1. Bagian tumbuhan yang berfungsi menyerap air dan unsur hara dari dalam tanah adalah...
-A. Daun
-B. Akar
-C. Batang
-D. Buah
-Kunci: B
-
-2. Hasil dari perhitungan 15 + 35 : 5 adalah...
-A. 10
-B. 18
-C. 22
-D. 25
-Kunci: C
-
-3. Lambang sila ketiga Pancasila adalah...
-A. Bintang
-B. Rantai emas
-C. Pohon beringin
-D. Kepala banteng
-Kunci: C
-
-------------------------------------------------------------------------
-CONTOH FORMAT SOAL ESAI / URAIAN:
-------------------------------------------------------------------------
-
-1. [ESAI] Jelaskan perbedaan antara rangkaian listrik seri dan paralel beserta contohnya!
-Pedoman Kunci: Rangkaian seri dipasang berurutan tanpa cabang, sedangkan paralel dipasang bercabang. Contoh seri: lampu hias; paralel: instalasi rumah.
-
-========================================================================
-TXT;
-            echo $content;
-        }, $filename, [
-            'Content-Type' => 'text/plain; charset=UTF-8',
-            'Content-Disposition' => "attachment; filename=\"{$filename}\"",
+        return response()->download($filePath, 'template-impor-bank-soal.pdf', [
+            'Content-Type' => 'application/pdf',
         ]);
     }
 }

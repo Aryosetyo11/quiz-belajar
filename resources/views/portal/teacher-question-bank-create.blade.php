@@ -17,7 +17,7 @@
                 </span>
                 <h1 class="mt-2 text-3xl font-bold tracking-tight text-slate-950 sm:text-4xl">Tambah Paket Soal Baru</h1>
                 <p class="mt-1 text-sm text-slate-600">
-                    Susun butir soal manual dengan navigasi nomor, atau impor langsung dari file Excel/CSV/PDF.
+                    Susun butir soal manual dengan navigasi nomor, atau impor dari Excel, CSV, TXT, dan PDF.
                 </p>
             </div>
             <div class="flex items-center gap-2">
@@ -157,7 +157,7 @@
 <div id="quick-import-modal" class="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/40 p-4 backdrop-blur-xs hidden" role="dialog" aria-modal="true">
     <div class="w-full max-w-lg rounded-2xl border border-slate-200 bg-white p-6 shadow-xl transition-all">
         <div class="flex items-center justify-between border-b border-slate-100 pb-3">
-            <h3 class="text-base font-bold text-slate-900">Impor dari File Excel / CSV / PDF</h3>
+            <h3 class="text-base font-bold text-slate-900">Impor dari Excel, CSV, TXT, atau PDF</h3>
             <button type="button" onclick="closeImportTab()" class="rounded-lg p-1.5 text-slate-400 hover:bg-slate-100">
                 <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
             </button>
@@ -181,8 +181,10 @@
             </div>
 
             <div>
-                <label class="block text-xs font-bold text-slate-700">Pilih File (.xlsx, .csv, atau .pdf) <span class="text-rose-500">*</span></label>
-                <input type="file" name="file" accept=".xlsx,.xls,.csv,.txt,.pdf" required class="mt-1.5 block w-full rounded-xl border border-slate-300 bg-white p-2 text-xs text-slate-700">
+                <label class="block text-xs font-bold text-slate-700">Pilih File (.xlsx, .csv, .txt, .pdf) <span class="text-rose-500">*</span></label>
+                <input type="file" name="file" accept=".xlsx,.csv,.txt,.pdf" required class="mt-1.5 block w-full rounded-xl border border-slate-300 bg-white p-2 text-xs text-slate-700">
+                <p class="mt-2 text-xs leading-5 text-slate-600">PDF harus berupa dokumen teks, bukan scan atau foto. <a href="{{ route($questionBankRoutePrefix.'.template.pdf') }}" class="font-semibold text-indigo-700 underline underline-offset-2">Unduh contoh PDF impor</a></p>
+                @error('file')<p class="mt-2 text-sm text-rose-700" role="alert">{{ $message }}</p>@enderror
             </div>
 
             <div class="mt-5 flex items-center justify-end gap-2.5 border-t border-slate-100 pt-4">

@@ -103,8 +103,8 @@
                     </article>
                 @endforeach
                 @if (! $isPackageLocked)
-                    <div id="add-question-modal" class="fixed inset-0 z-50 hidden overflow-y-auto bg-slate-950/40 p-4" role="dialog" aria-modal="true" aria-labelledby="add-question-title">
-                      <div class="mx-auto mt-6 w-full max-w-2xl rounded-xl bg-white p-5 shadow-xl sm:mt-12 sm:p-6">
+                    <div id="add-question-modal" class="fixed inset-0 z-[100] hidden items-center justify-center overflow-y-auto overscroll-contain bg-slate-950/50 p-3 sm:p-6" role="dialog" aria-modal="true" aria-labelledby="add-question-title">
+                      <div class="my-auto max-h-[calc(100dvh-1.5rem)] w-full max-w-2xl overflow-y-auto rounded-xl bg-white p-5 shadow-xl sm:max-h-[calc(100dvh-3rem)] sm:p-6">
                         <div class="flex items-start justify-between border-b border-slate-100 pb-4"><div><h2 id="add-question-title" class="text-xl font-semibold text-slate-950">Tambah soal ke paket</h2><p class="mt-1 text-sm text-slate-600">Soal akan langsung ditambahkan ke “{{ $package->title }}”.</p></div><button type="button" onclick="closePackageModal('add-question-modal')" class="rounded-lg px-3 py-1 text-xl text-slate-500 hover:bg-slate-100" aria-label="Tutup">&times;</button></div>
                         <form method="POST" action="{{ route($questionBankRoutePrefix.'.package.questions.store', $package) }}" class="space-y-4 border-t border-indigo-100 p-4">
                             @csrf
@@ -125,15 +125,16 @@
                       </div>
                     </div>
 
-                    <div id="import-question-modal" class="fixed inset-0 z-50 hidden overflow-y-auto bg-slate-950/40 p-4" role="dialog" aria-modal="true" aria-labelledby="import-question-title">
-                      <div class="mx-auto mt-6 w-full max-w-lg rounded-xl bg-white p-5 shadow-xl sm:mt-12 sm:p-6">
+                    <div id="import-question-modal" class="fixed inset-0 z-[100] hidden items-center justify-center overflow-y-auto overscroll-contain bg-slate-950/50 p-3 sm:p-6" role="dialog" aria-modal="true" aria-labelledby="import-question-title">
+                      <div class="my-auto max-h-[calc(100dvh-1.5rem)] w-full max-w-2xl overflow-y-auto rounded-xl bg-white p-5 shadow-xl sm:max-h-[calc(100dvh-3rem)] sm:p-6">
                         <div class="flex items-start justify-between border-b border-slate-100 pb-4"><div><h2 id="import-question-title" class="text-xl font-semibold text-slate-950">Impor soal ke paket</h2><p class="mt-1 text-sm text-slate-600">File akan ditambahkan ke “{{ $package->title }}”.</p></div><button type="button" onclick="closePackageModal('import-question-modal')" class="rounded-lg px-3 py-1 text-xl text-slate-500 hover:bg-slate-100" aria-label="Tutup">&times;</button></div>
                         <form method="POST" action="{{ route($questionBankRoutePrefix.'.import') }}" enctype="multipart/form-data" class="mt-5 space-y-4">
                             @csrf
                             <input type="hidden" name="exam_id" value="{{ $package->id }}">
                             <input type="hidden" name="subject_id" value="{{ $package->subject_id }}">
-                            <a href="{{ route($questionBankRoutePrefix.'.template.combined') }}" class="inline-flex text-sm font-semibold text-indigo-700 underline underline-offset-4">Unduh template gabungan PG + esai</a>
-                            <div><label for="package-import-file" class="mb-1.5 block text-sm font-medium text-slate-800">File (.xlsx, .csv, .txt, .pdf)</label><input id="package-import-file" type="file" name="file" accept=".xlsx,.xls,.csv,.txt,.pdf" required class="w-full rounded-lg border border-slate-300 p-2 text-sm"></div>
+                            <div class="flex flex-wrap gap-4"><a href="{{ route($questionBankRoutePrefix.'.template.combined') }}" class="inline-flex text-sm font-semibold text-indigo-700 underline underline-offset-4">Template gabungan PG + esai (CSV)</a><a href="{{ route($questionBankRoutePrefix.'.template.pdf') }}" class="inline-flex text-sm font-semibold text-rose-700 underline underline-offset-4">Contoh PDF impor</a></div>
+                            <div><label for="package-import-file" class="mb-1.5 block text-sm font-medium text-slate-800">File (.xlsx, .csv, .txt, .pdf)</label><input id="package-import-file" type="file" name="file" accept=".xlsx,.csv,.txt,.pdf" required class="w-full rounded-lg border border-slate-300 p-2 text-sm"><p class="mt-1 text-xs leading-5 text-slate-500">PDF harus berisi teks yang bisa diseleksi, bukan hasil scan/foto.</p></div>
+                            @error('file')<p class="text-sm text-rose-700" role="alert">{{ $message }}</p>@enderror
                             <div class="flex justify-end gap-2 border-t border-slate-100 pt-4"><button type="button" onclick="closePackageModal('import-question-modal')" class="rounded-lg border border-slate-300 px-4 py-2.5 text-sm font-semibold text-slate-700">Batal</button><button type="submit" class="rounded-lg bg-indigo-700 px-4 py-2.5 text-sm font-semibold text-white">Impor ke paket</button></div>
                         </form>
                       </div>
@@ -153,8 +154,39 @@
 </div>
 
 <script>
-    function openPackageModal(id) { document.getElementById(id)?.classList.remove('hidden'); }
-    function closePackageModal(id) { document.getElementById(id)?.classList.add('hidden'); }
+    const packageModalIds = ['add-question-modal', 'import-question-modal'];
+
+    packageModalIds.forEach((id) => {
+        const modal = document.getElementById(id);
+        if (modal) {
+            document.body.append(modal);
+        }
+    });
+
+    function openPackageModal(id) {
+        const modal = document.getElementById(id);
+        if (!modal) {
+            return;
+        }
+
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
+        document.body.classList.add('overflow-hidden');
+    }
+
+    function closePackageModal(id) {
+        const modal = document.getElementById(id);
+        if (!modal) {
+            return;
+        }
+
+        modal.classList.add('hidden');
+        modal.classList.remove('flex');
+
+        if (packageModalIds.every((modalId) => document.getElementById(modalId)?.classList.contains('hidden'))) {
+            document.body.classList.remove('overflow-hidden');
+        }
+    }
 
     document.querySelectorAll('[data-question-browser]').forEach((browser) => {
         const cards = [...browser.querySelectorAll('[data-question-item]')];

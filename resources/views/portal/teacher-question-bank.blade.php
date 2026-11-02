@@ -87,7 +87,10 @@
 
     <details class="rounded-xl border border-slate-200 bg-white">
         <summary class="cursor-pointer px-5 py-4 text-sm font-semibold text-slate-800">Unduh template impor</summary>
-        <div class="flex flex-wrap gap-3 border-t border-slate-100 p-5"><a href="{{ route($questionBankRoutePrefix.'.template.combined') }}" class="rounded-lg bg-indigo-700 px-4 py-2.5 text-sm font-semibold text-white">Template gabungan PG + esai</a><a href="{{ route($questionBankRoutePrefix.'.template.pg') }}" class="rounded-lg border border-slate-300 px-4 py-2.5 text-sm font-semibold text-slate-700">Template pilihan ganda</a><a href="{{ route($questionBankRoutePrefix.'.template.essay') }}" class="rounded-lg border border-slate-300 px-4 py-2.5 text-sm font-semibold text-slate-700">Template esai</a><a href="{{ route($questionBankRoutePrefix.'.template.pdf') }}" class="rounded-lg border border-slate-300 px-4 py-2.5 text-sm font-semibold text-slate-700">Contoh dokumen</a></div>
+        <div class="border-t border-slate-100 p-5">
+            <p class="mb-4 text-sm leading-6 text-slate-600">PDF yang diimpor harus berbasis teks dan mengikuti contoh. PDF hasil scan/foto perlu OCR terlebih dahulu.</p>
+            <div class="flex flex-wrap gap-3"><a href="{{ route($questionBankRoutePrefix.'.template.combined') }}" class="rounded-lg bg-indigo-700 px-4 py-2.5 text-sm font-semibold text-white">Template gabungan PG + esai (CSV)</a><a href="{{ route($questionBankRoutePrefix.'.template.pg') }}" class="rounded-lg border border-slate-300 px-4 py-2.5 text-sm font-semibold text-slate-700">Template pilihan ganda (CSV)</a><a href="{{ route($questionBankRoutePrefix.'.template.essay') }}" class="rounded-lg border border-slate-300 px-4 py-2.5 text-sm font-semibold text-slate-700">Template esai (CSV)</a><a href="{{ route($questionBankRoutePrefix.'.template.pdf') }}" class="rounded-lg border border-rose-200 bg-rose-50 px-4 py-2.5 text-sm font-semibold text-rose-800">Unduh contoh PDF impor</a></div>
+        </div>
     </details>
 </div>
 
@@ -96,9 +99,11 @@
         <div class="flex items-start justify-between"><div><h2 id="import-title" class="text-xl font-semibold text-slate-950">Impor soal</h2><p class="mt-1 text-sm text-slate-600">Impor akan membuat paket baru.</p></div><button type="button" onclick="closeImportModal()" class="rounded-lg px-3 py-1 text-xl text-slate-500 hover:bg-slate-100" aria-label="Tutup">&times;</button></div>
         <form method="POST" action="{{ route($questionBankRoutePrefix.'.import') }}" enctype="multipart/form-data" class="mt-5 space-y-4">
             @csrf
+            <p class="text-sm leading-6 text-slate-600">PDF perlu berupa teks sederhana yang mengikuti format impor. <a href="{{ route($questionBankRoutePrefix.'.template.pdf') }}" class="font-semibold text-indigo-700 underline underline-offset-2">Unduh contoh PDF</a>.</p>
             <div><label for="import-subject-id" class="mb-1.5 block text-sm font-medium text-slate-800">Mata pelajaran</label><select id="import-subject-id" name="subject_id" required class="w-full rounded-lg border border-slate-300 px-3 py-2.5 text-sm"><option value="">Pilih mata pelajaran</option>@foreach ($subjects as $subject)<option value="{{ $subject->id }}">{{ $subject->name }}@if ($isGlobalQuestionBankManager) — {{ $subject->school->name ?? 'Sekolah' }} · {{ $subject->classroom->name ?? 'Rombel' }}@endif</option>@endforeach</select></div>
             <div><label for="import-title" class="mb-1.5 block text-sm font-medium text-slate-800">Nama paket</label><input id="import-title" name="title" required maxlength="160" class="w-full rounded-lg border border-slate-300 px-3 py-2.5 text-sm" placeholder="Contoh: Latihan Bab 1"></div>
-            <div><label for="import-file" class="mb-1.5 block text-sm font-medium text-slate-800">File (.xlsx, .csv, .txt, .pdf)</label><input id="import-file" type="file" name="file" accept=".xlsx,.xls,.csv,.txt,.pdf" required class="w-full rounded-lg border border-slate-300 p-2 text-sm"></div>
+            <div><label for="import-file" class="mb-1.5 block text-sm font-medium text-slate-800">File (.xlsx, .csv, .txt, .pdf)</label><input id="import-file" type="file" name="file" accept=".xlsx,.csv,.txt,.pdf" required class="w-full rounded-lg border border-slate-300 p-2 text-sm"></div>
+            @error('file')<p class="text-sm text-rose-700" role="alert">{{ $message }}</p>@enderror
             <div class="flex justify-end gap-2 border-t border-slate-100 pt-4"><button type="button" onclick="closeImportModal()" class="rounded-lg border border-slate-300 px-4 py-2.5 text-sm font-semibold text-slate-700">Batal</button><button type="submit" class="rounded-lg bg-indigo-700 px-4 py-2.5 text-sm font-semibold text-white">Impor dan simpan</button></div>
         </form>
     </div>

@@ -21,7 +21,7 @@ class ExamQuestionImporter
             'xlsx' => $this->importSpreadsheet($file->getRealPath()),
             'csv', 'txt' => $this->importCsv($file->getRealPath()),
             'pdf' => $this->importPdf($file->getRealPath()),
-            default => throw new RuntimeException('Format file belum didukung. Gunakan file Excel (.xlsx), CSV (.csv), atau dokumen PDF.'),
+            default => throw new RuntimeException('Format file belum didukung. Gunakan Excel (.xlsx), CSV (.csv), TXT (.txt), atau PDF (.pdf).'),
         };
     }
 
@@ -334,30 +334,92 @@ class ExamQuestionImporter
             }
         }
 
-        $text = preg_replace('/\s+/u', ' ', $text) ?? '';
         if (trim($text) === '') {
-            throw new RuntimeException('Teks PDF tidak dapat terbaca. Gunakan file Excel (.xlsx) atau CSV untuk hasil impor yang paling akurat.');
+            throw new RuntimeException('Teks PDF tidak terbaca. Pastikan teksnya bisa diseleksi, bukan hasil scan/foto. PDF hasil scan perlu OCR terlebih dahulu.');
         }
 
-        preg_match_all('/(?:^|\s)\d+[.)]\s*(.+?)\s+A[.)]\s*(.+?)\s+B[.)]\s*(.+?)\s+C[.)]\s*(.+?)\s+D[.)]\s*(.+?)\s+(?:kunci|jawaban)\s*:?\s*([A-D])/iu', $text, $matches, PREG_SET_ORDER);
-        $questions = [];
-        foreach ($matches as $match) {
-            $questions[] = [
-                'prompt' => trim($match[1]),
-                'type' => ExamQuestion::TYPE_MULTIPLE_CHOICE,
-                'options' => [
-                    'A' => trim($match[2]),
-                    'B' => trim($match[3]),
-                    'C' => trim($match[4]),
-                    'D' => trim($match[5]),
-                ],
-                'answer_key' => strtoupper(trim($match[6])),
-                'sample_answer' => null,
-                'points' => 10,
-            ];
+        $orderedQuestions = [];
+        $questionBlocks = [];
+        $currentBlock = null;
+
+        foreach (preg_split('/\R/u', $text) ?: [] as $line) {
+            $line = trim($line);
+
+            if (preg_match('/^(\d+)[.)]\s*(.*)$/u', $line, $questionStart) === 1) {
+                if ($currentBlock !== null) {
+                    $questionBlocks[] = $currentBlock;
+                }
+
+                $currentBlock = [
+                    'number' => (int) $questionStart[1],
+                    'lines' => [$questionStart[2]],
+                ];
+
+                continue;
+            }
+
+            if ($currentBlock !== null && $line !== '') {
+                $currentBlock['lines'][] = $line;
+            }
         }
 
-        return $this->ensureQuestions($questions);
+        if ($currentBlock !== null) {
+            $questionBlocks[] = $currentBlock;
+        }
+
+        foreach ($questionBlocks as $block) {
+            $blockText = preg_replace('/\s+/u', ' ', implode(' ', $block['lines'])) ?? '';
+
+            if (str_starts_with(mb_strtoupper($blockText), '[ESAI]')
+                && preg_match('/^(\[ESAI\].*?\s+poin\s*:?\s*\d+)/iu', $blockText, $completeEssayBlock) === 1) {
+                $blockText = $completeEssayBlock[1];
+            } elseif (preg_match('/^(.+?\s+(?:kunci|jawaban)\s*:?\s*[A-D](?:\s+poin\s*:?\s*\d+)?)/iu', $blockText, $completeMultipleChoiceBlock) === 1) {
+                $blockText = $completeMultipleChoiceBlock[1];
+            }
+
+            if (preg_match('/^\[ESAI\]\s*(.+?)(?:\s+(?:pedoman(?:\s+jawaban)?|kunci\s+esai)\s*:\s*(.*?))?(?:\s+poin\s*:?\s*(\d+))?\s*$/iu', $blockText, $essayMatch) === 1) {
+                $orderedQuestions[] = [
+                    'number' => $block['number'],
+                    'question' => [
+                        'prompt' => trim($essayMatch[1]),
+                        'type' => ExamQuestion::TYPE_ESSAY,
+                        'options' => null,
+                        'answer_key' => null,
+                        'sample_answer' => isset($essayMatch[2]) && trim($essayMatch[2]) !== '' ? trim($essayMatch[2]) : null,
+                        'points' => isset($essayMatch[3]) && $essayMatch[3] !== '' ? max(1, min(100, (int) $essayMatch[3])) : 10,
+                    ],
+                ];
+
+                continue;
+            }
+
+            if (preg_match('/^(.+?)\s+A[.)]\s*(.+?)\s+B[.)]\s*(.+?)\s+C[.)]\s*(.+?)\s+D[.)]\s*(.+?)\s+(?:kunci|jawaban)\s*:?\s*([A-D])(?:\s+poin\s*:?\s*(\d+))?\s*$/iu', $blockText, $multipleChoiceMatch) === 1) {
+                $orderedQuestions[] = [
+                    'number' => $block['number'],
+                    'question' => [
+                        'prompt' => trim($multipleChoiceMatch[1]),
+                        'type' => ExamQuestion::TYPE_MULTIPLE_CHOICE,
+                        'options' => [
+                            'A' => trim($multipleChoiceMatch[2]),
+                            'B' => trim($multipleChoiceMatch[3]),
+                            'C' => trim($multipleChoiceMatch[4]),
+                            'D' => trim($multipleChoiceMatch[5]),
+                        ],
+                        'answer_key' => strtoupper(trim($multipleChoiceMatch[6])),
+                        'sample_answer' => null,
+                        'points' => isset($multipleChoiceMatch[7]) && $multipleChoiceMatch[7] !== '' ? max(1, min(100, (int) $multipleChoiceMatch[7])) : 10,
+                    ],
+                ];
+            }
+        }
+
+        if ($orderedQuestions === []) {
+            throw new RuntimeException('PDF terbaca, tetapi format soalnya belum sesuai. Ikuti format pada Template PDF: soal PG memakai pilihan A-D dan "Kunci: A"; soal esai memakai tanda [ESAI] dan "Pedoman Jawaban:".');
+        }
+
+        usort($orderedQuestions, static fn (array $first, array $second): int => $first['number'] <=> $second['number']);
+
+        return $this->ensureQuestions(array_map(static fn (array $item): array => $item['question'], $orderedQuestions));
     }
 
     private function decodePdfLiteral(string $literal): string

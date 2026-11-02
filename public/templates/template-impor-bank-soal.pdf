@@ -1,0 +1,89 @@
+%PDF-1.4
+%RuangUji template
+1 0 obj
+<< /Type /Catalog /Pages 2 0 R >>
+endobj
+2 0 obj
+<< /Type /Pages /Kids [5 0 R 7 0 R] /Count 2 >>
+endobj
+3 0 obj
+<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica /Encoding /WinAnsiEncoding >>
+endobj
+4 0 obj
+<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica-Bold /Encoding /WinAnsiEncoding >>
+endobj
+5 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 595 842] /Resources << /Font << /F1 3 0 R /F2 4 0 R >> >> /Contents 6 0 R >>
+endobj
+6 0 obj
+<< /Length 1675 >>
+stream
+BT /F2 18 Tf 48 790 Td (RuangUji - Template Impor Bank Soal) Tj ET
+BT /F2 12 Tf 48 765 Td (CONTOH PDF YANG DAPAT DIIMPOR) Tj ET
+BT /F1 10 Tf 48 747 Td (Gunakan PDF berbasis teks sederhana; isi harus terbaca dan dapat disalin.) Tj ET
+BT /F1 10 Tf 48 729 Td (PDF hasil scan/foto perlu OCR dan belum dapat diimpor langsung.) Tj ET
+BT /F1 10 Tf 48 711 Td () Tj ET
+BT /F2 13 Tf 48 693 Td (FORMAT PILIHAN GANDA) Tj ET
+BT /F1 10 Tf 48 675 Td (Tulis nomor, pertanyaan, pilihan A sampai D, lalu Kunci: huruf.) Tj ET
+BT /F1 10 Tf 48 657 Td (Poin boleh dicantumkan setelah kunci. Jika kosong, nilainya 10.) Tj ET
+BT /F1 10 Tf 48 639 Td () Tj ET
+BT /F2 11 Tf 48 621 Td (1. Ibu kota Indonesia adalah ...) Tj ET
+BT /F1 10 Tf 48 603 Td (A. Jakarta) Tj ET
+BT /F1 10 Tf 48 585 Td (B. Bandung) Tj ET
+BT /F1 10 Tf 48 567 Td (C. Surabaya) Tj ET
+BT /F1 10 Tf 48 549 Td (D. Medan) Tj ET
+BT /F1 10 Tf 48 531 Td (Kunci: A) Tj ET
+BT /F1 10 Tf 48 513 Td (Poin: 10) Tj ET
+BT /F1 10 Tf 48 495 Td () Tj ET
+BT /F2 11 Tf 48 477 Td (2. Hasil dari 8 x 7 adalah ...) Tj ET
+BT /F1 10 Tf 48 459 Td (A. 54) Tj ET
+BT /F1 10 Tf 48 441 Td (B. 56) Tj ET
+BT /F1 10 Tf 48 423 Td (C. 64) Tj ET
+BT /F1 10 Tf 48 405 Td (D. 48) Tj ET
+BT /F1 10 Tf 48 387 Td (Kunci: B) Tj ET
+BT /F1 10 Tf 48 369 Td (Poin: 10) Tj ET
+BT /F1 10 Tf 48 351 Td () Tj ET
+BT /F2 13 Tf 48 333 Td (FORMAT ESAI - BOLEH DICAMPUR DENGAN PG) Tj ET
+BT /F1 10 Tf 48 315 Td (Tandai awal soal esai dengan [ESAI], lalu tulis pedoman jawabannya.) Tj ET
+BT /F2 11 Tf 48 297 Td (3. [ESAI] Jelaskan fungsi akar pada tumbuhan.) Tj ET
+BT /F1 10 Tf 48 279 Td (Pedoman Jawaban: Akar menyerap air dan mineral dari tanah.) Tj ET
+BT /F1 10 Tf 48 261 Td (Poin: 20) Tj ET
+endstream
+endobj
+7 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 595 842] /Resources << /Font << /F1 3 0 R /F2 4 0 R >> >> /Contents 8 0 R >>
+endobj
+8 0 obj
+<< /Length 1100 >>
+stream
+BT /F2 16 Tf 48 790 Td (Panduan singkat menyiapkan PDF) Tj ET
+BT /F1 11 Tf 48 765 Td (Langkah 1: Buat PDF dari dokumen teks, bukan hasil foto atau scan.) Tj ET
+BT /F1 11 Tf 48 747 Td (Langkah 2: Untuk pilihan ganda, gunakan empat opsi berhuruf dan satu kunci.) Tj ET
+BT /F1 11 Tf 48 729 Td (Langkah 3: Awali soal esai dengan tanda [ESAI].) Tj ET
+BT /F1 11 Tf 48 711 Td (Langkah 4: Gunakan label Pedoman Jawaban: sebelum pedoman esai.) Tj ET
+BT /F1 11 Tf 48 693 Td (Langkah 5: Poin bersifat opsional; nilai awalnya 10.) Tj ET
+BT /F1 11 Tf 48 675 Td (Gunakan satu kolom. Hindari tabel, gambar soal, dan rumus khusus.) Tj ET
+BT /F1 10 Tf 48 657 Td () Tj ET
+BT /F2 13 Tf 48 639 Td (Batasan impor PDF) Tj ET
+BT /F1 11 Tf 48 621 Td (PDF scan/foto perlu OCR sebelum dapat dicoba untuk diimpor.) Tj ET
+BT /F1 11 Tf 48 603 Td (PDF dengan layout kompleks, tabel, atau font khusus dapat gagal dibaca.) Tj ET
+BT /F1 11 Tf 48 585 Td (Jika impor PDF masih gagal, gunakan template CSV gabungan PG + esai.) Tj ET
+BT /F2 11 Tf 48 567 Td (Setelah impor, periksa kembali setiap soal, pilihan, dan kunci jawaban.) Tj ET
+endstream
+endobj
+xref
+0 9
+0000000000 65535 f 
+0000000028 00000 n 
+0000000077 00000 n 
+0000000140 00000 n 
+0000000237 00000 n 
+0000000339 00000 n 
+0000000475 00000 n 
+0000002201 00000 n 
+0000002337 00000 n 
+trailer
+<< /Size 9 /Root 1 0 R >>
+startxref
+3488
+%%EOF
