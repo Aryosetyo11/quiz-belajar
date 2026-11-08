@@ -120,17 +120,6 @@ class AdminSchoolController extends Controller
 
         $student = User::query()->where('role', User::ROLE_STUDENT)->findOrFail($validated['student_id']);
 
-        $alreadyAssignedToDifferentClass = $student->classrooms()
-            ->where('classrooms.school_id', $classroom->school_id)
-            ->where('classrooms.academic_year', $classroom->academic_year)
-            ->where('classrooms.id', '<>', $classroom->id)
-            ->exists();
-
-        if ($alreadyAssignedToDifferentClass) {
-            return to_route('admin.classrooms.students', $classroom)
-                ->withErrors(['student_id' => 'Siswa sudah terdaftar di rombel lain pada tahun ajaran ini. Keluarkan dari rombel sebelumnya terlebih dahulu.']);
-        }
-
         DB::transaction(function () use ($classroom, $student): void {
             $classroom->students()->syncWithoutDetaching([$student->id]);
 

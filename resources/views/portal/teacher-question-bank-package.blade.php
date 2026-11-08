@@ -13,12 +13,53 @@
                 <h1 class="mt-2 text-3xl font-semibold tracking-tight text-slate-950 sm:text-4xl">{{ $package->title }}</h1>
                 <p class="mt-2 text-base text-slate-600">{{ $questions->count() }} soal dalam paket ini</p>
             </div>
-            <div class="flex gap-2">
-                <span class="inline-flex items-center rounded-lg bg-indigo-50 px-2.5 py-1 text-sm font-semibold text-indigo-700 ring-1 ring-inset ring-indigo-600/10">{{ $questions->where('type', \App\Models\ExamQuestion::TYPE_MULTIPLE_CHOICE)->count() }} PG</span>
-                <span class="inline-flex items-center rounded-lg bg-indigo-50 px-2.5 py-1 text-sm font-semibold text-indigo-700 ring-1 ring-inset ring-indigo-600/10">{{ $questions->where('type', \App\Models\ExamQuestion::TYPE_ESSAY)->count() }} esai</span>
+            <div class="flex flex-col items-start gap-3 sm:items-end">
+                <div class="flex gap-2">
+                    <span class="inline-flex items-center rounded-lg bg-indigo-50 px-2.5 py-1 text-sm font-semibold text-indigo-700 ring-1 ring-inset ring-indigo-600/10">{{ $questions->where('type', \App\Models\ExamQuestion::TYPE_MULTIPLE_CHOICE)->count() }} PG</span>
+                    <span class="inline-flex items-center rounded-lg bg-indigo-50 px-2.5 py-1 text-sm font-semibold text-indigo-700 ring-1 ring-inset ring-indigo-600/10">{{ $questions->where('type', \App\Models\ExamQuestion::TYPE_ESSAY)->count() }} esai</span>
+                </div>
+                <div class="flex flex-wrap gap-2">
+                    <button type="button" onclick="openPackageModal('edit-package-modal')" class="rounded-lg border border-slate-300 bg-white px-3.5 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50">Ubah nama paket</button>
+                    @if ($canDeletePackage)
+                        <form method="POST" action="{{ route($questionBankRoutePrefix.'.package.destroy', $package) }}" data-confirm="Hapus paket '{{ $package->title }}' beserta {{ $questions->count() }} soal di dalamnya? Tindakan ini tidak bisa dibatalkan." data-confirm-title="Hapus seluruh paket?" data-confirm-btn="Ya, hapus paket" data-confirm-variant="danger">
+                            @csrf
+                            @method('DELETE')
+                            <button type="submit" class="rounded-lg border border-rose-200 bg-rose-50 px-3.5 py-2 text-sm font-semibold text-rose-700 hover:bg-rose-100">Hapus paket</button>
+                        </form>
+                    @else
+                        <button type="button" disabled title="Paket yang terhubung ke sesi ujian tidak dapat dihapus." class="cursor-not-allowed rounded-lg border border-slate-200 bg-slate-100 px-3.5 py-2 text-sm font-semibold text-slate-400">Hapus paket</button>
+                    @endif
+                </div>
+                @unless ($canDeletePackage)
+                    <p class="max-w-sm text-xs leading-5 text-slate-500 sm:text-right">Paket ini sudah terhubung ke sesi ujian, jadi tidak dapat dihapus.</p>
+                @endunless
             </div>
         </div>
     </header>
+
+    <div id="edit-package-modal" class="fixed inset-0 z-[100] hidden items-center justify-center overflow-y-auto overscroll-contain bg-slate-950/50 p-3 sm:p-6" role="dialog" aria-modal="true" aria-labelledby="edit-package-title">
+        <div class="my-auto w-full max-w-lg rounded-xl bg-white p-5 shadow-xl sm:p-6">
+            <div class="flex items-start justify-between border-b border-slate-100 pb-4">
+                <div>
+                    <h2 id="edit-package-title" class="text-xl font-semibold text-slate-950">Ubah nama paket</h2>
+                    <p class="mt-1 text-sm text-slate-600">Periksa kembali nama sebelum disimpan.</p>
+                </div>
+                <button type="button" onclick="closePackageModal('edit-package-modal')" class="rounded-lg px-3 py-1 text-xl text-slate-500 hover:bg-slate-100" aria-label="Tutup">&times;</button>
+            </div>
+            <form method="POST" action="{{ route($questionBankRoutePrefix.'.package.update', $package) }}" class="mt-5 space-y-4">
+                @csrf
+                @method('PUT')
+                <div>
+                    <label for="package-title" class="mb-1.5 block text-sm font-semibold text-slate-800">Nama paket</label>
+                    <input id="package-title" name="title" type="text" value="{{ $package->title }}" maxlength="160" required class="w-full rounded-lg border border-slate-300 px-3.5 py-2.5 text-base focus:border-indigo-600 focus:outline-none focus:ring-4 focus:ring-indigo-100">
+                </div>
+                <div class="flex justify-end gap-2 border-t border-slate-100 pt-4">
+                    <button type="button" onclick="closePackageModal('edit-package-modal')" class="rounded-lg border border-slate-300 px-4 py-2.5 text-sm font-semibold text-slate-700">Batal</button>
+                    <button type="submit" class="rounded-lg bg-indigo-700 px-4 py-2.5 text-sm font-semibold text-white hover:bg-indigo-800">Simpan nama</button>
+                </div>
+            </form>
+        </div>
+    </div>
 
     @if ($questions->isEmpty())
         <div class="rounded-xl border border-dashed border-slate-300 bg-white px-6 py-12 text-center">
@@ -145,7 +186,7 @@
                 <h2 class="text-sm font-semibold text-slate-900">Pilih nomor soal</h2>
                 <nav class="mt-4 grid max-h-96 grid-cols-4 content-start gap-2 overflow-y-auto" aria-label="Nomor soal">
                     @foreach ($questions as $question)
-                        <button type="button" data-question-number="{{ $loop->index }}" aria-pressed="{{ $loop->first ? 'true' : 'false' }}" class="flex h-9 items-center justify-center rounded-md border text-sm font-semibold transition {{ $loop->first ? 'border-indigo-700 bg-indigo-700 text-white' : 'border-slate-200 bg-white text-slate-700 hover:bg-indigo-50' }}">{{ $loop->iteration }}</button>
+                        <button type="button" data-question-number="{{ $loop->index }}" aria-pressed="{{ $loop->first ? 'true' : 'false' }}" class="flex h-9 items-center justify-center rounded-md border text-sm font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2 {{ $loop->first ? 'border-indigo-700 bg-indigo-700 text-white hover:border-indigo-800 hover:bg-indigo-800' : 'border-slate-200 bg-white text-slate-700 hover:border-indigo-400 hover:bg-indigo-100 hover:text-indigo-900' }}">{{ $loop->iteration }}</button>
                     @endforeach
                 </nav>
             </aside>
@@ -154,7 +195,7 @@
 </div>
 
 <script>
-    const packageModalIds = ['add-question-modal', 'import-question-modal'];
+    const packageModalIds = ['edit-package-modal', 'add-question-modal', 'import-question-modal'];
 
     packageModalIds.forEach((id) => {
         const modal = document.getElementById(id);
@@ -206,6 +247,11 @@
                 button.classList.toggle('border-indigo-700', active);
                 button.classList.toggle('bg-indigo-700', active);
                 button.classList.toggle('text-white', active);
+                button.classList.toggle('hover:border-indigo-800', active);
+                button.classList.toggle('hover:bg-indigo-800', active);
+                button.classList.toggle('hover:border-indigo-400', !active);
+                button.classList.toggle('hover:bg-indigo-100', !active);
+                button.classList.toggle('hover:text-indigo-900', !active);
                 button.classList.toggle('border-slate-200', !active);
                 button.classList.toggle('bg-white', !active);
                 button.classList.toggle('text-slate-700', !active);

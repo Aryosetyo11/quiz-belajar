@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\School;
 use App\Models\User;
+use App\Services\UserImportService;
 use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\RedirectResponse;
@@ -12,6 +13,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\Rules\Password;
 use Illuminate\Validation\ValidationException;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class AdminUserController extends Controller
 {
@@ -75,6 +77,32 @@ class AdminUserController extends Controller
         ]);
 
         return to_route('admin.users')->with('status', 'Akun berhasil dibuat.');
+    }
+
+    public function import(Request $request, UserImportService $userImportService): RedirectResponse
+    {
+        $validated = $request->validate([
+            'import_school_id' => ['required', 'integer', Rule::exists('schools', 'id')->where('is_active', true)],
+            'file' => ['required', 'file', 'max:10240', 'mimes:xlsx,csv,txt'],
+        ]);
+
+        $result = $userImportService->import($validated['file'], (int) $validated['import_school_id']);
+
+        return to_route('admin.users')->with('status', "{$result['created']} akun berhasil diimpor.");
+    }
+
+    public function template(): StreamedResponse
+    {
+        return response()->streamDownload(function (): void {
+            $stream = fopen('php://output', 'w');
+            fwrite($stream, "\xEF\xBB\xBF");
+            fputcsv($stream, ['role', 'nama', 'email', 'nisn', 'password', 'bidang_mapel']);
+            fputcsv($stream, ['guru', 'Nama Guru Contoh', 'guru@example.test', '', 'GuruContoh!2026', 'Matematika']);
+            fputcsv($stream, ['siswa', 'Nama Siswa Contoh', '', '0000000001', 'SiswaContoh!2026', '']);
+            fclose($stream);
+        }, 'template-impor-pengguna.csv', [
+            'Content-Type' => 'text/csv; charset=UTF-8',
+        ]);
     }
 
     public function update(Request $request, User $user): RedirectResponse

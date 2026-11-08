@@ -11,7 +11,7 @@
         <a href="{{ route('admin.schools') }}" class="text-sm font-semibold text-indigo-800 hover:underline">← Kembali ke sekolah & rombel</a>
         <p class="mt-4 text-sm font-bold uppercase tracking-[0.1em] text-teal-800">Pengelolaan kelas</p>
         <h1 class="mt-1 text-3xl font-bold tracking-tight text-slate-950 sm:text-4xl">Rombel {{ $classroom->name }}</h1>
-        <p class="mt-2 text-base leading-7 text-slate-600">{{ $classroom->school->name }} · Tahun ajaran {{ $classroom->academic_year }}. Siswa di rombel ini mendapat akses ke semua mapel yang ditugaskan ke kelasnya.</p>
+        <p class="mt-2 text-base leading-7 text-slate-600">{{ $classroom->school->name }} · Tahun ajaran {{ $classroom->academic_year }}. Siswa di rombel ini mendapat akses ke semua mapel yang ditugaskan ke kelasnya. Satu siswa dapat terdaftar di beberapa rombel.</p>
     </div>
     <span class="w-fit rounded-lg bg-orange-50 px-4 py-2 text-sm font-semibold text-orange-950">{{ number_format($roster->total(), 0, ',', '.') }} siswa terdaftar</span>
 </div>
@@ -68,7 +68,7 @@
     <section class="h-fit rounded-2xl border border-slate-200 bg-white p-5 shadow-sm sm:p-7" aria-labelledby="add-student-title">
         <p class="text-sm font-bold uppercase tracking-[0.1em] text-teal-800">Pendaftaran</p>
         <h2 id="add-student-title" class="mt-1 text-xl font-bold text-slate-950">Masukkan siswa ke kelas</h2>
-        <p class="mt-2 text-sm leading-6 text-slate-600">Pilih siswa dari sekolah yang sama. Pendaftaran memberi akses ke mapel yang terhubung dengan rombel ini.</p>
+        <p class="mt-2 text-sm leading-6 text-slate-600">Pilih siswa dari sekolah yang sama. Siswa yang sudah terdaftar di rombel lain tetap dapat ditambahkan. Pendaftaran memberi akses ke mapel yang terhubung dengan rombel ini.</p>
 
         <form method="GET" action="{{ route('admin.classrooms.students', $classroom) }}" class="mt-5 flex gap-2">
             <label for="candidate-search" class="sr-only">Cari siswa berdasarkan nama atau NISN</label>

@@ -50,6 +50,36 @@
             </article>
         </section>
 
+        <section class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6" aria-labelledby="school-activity-chart-title" data-reveal>
+            <div class="mb-5">
+                <p class="text-sm font-bold uppercase tracking-[0.1em] text-indigo-700">Aktivitas ujian</p>
+                <h2 id="school-activity-chart-title" class="mt-1 text-xl font-bold text-slate-950">Jawaban terkumpul per sekolah</h2>
+                <p class="mt-1 text-sm leading-6 text-slate-600">Volume pengumpulan pada periode dan filter yang dipilih, diurutkan dari terbanyak.</p>
+            </div>
+
+            @php($maxSubmissions = $activitySchools->max(fn ($school) => (int) ($school->exam_report->submitted_attempts_count ?? 0)) ?? 0)
+            @if ($activitySchools->isEmpty())
+                <p class="rounded-xl border border-dashed border-slate-300 bg-slate-50 p-5 text-sm text-slate-600">Tidak ada sekolah yang cocok dengan filter ini.</p>
+            @elseif ($maxSubmissions === 0)
+                <p class="rounded-xl border border-dashed border-slate-300 bg-slate-50 p-5 text-sm text-slate-600">Belum ada jawaban ujian yang terkumpul pada periode ini.</p>
+            @else
+                <div class="space-y-4" role="list" aria-label="Perbandingan jumlah jawaban terkumpul">
+                    @foreach ($activitySchools as $school)
+                        @php($submissionCount = (int) ($school->exam_report->submitted_attempts_count ?? 0))
+                        @php($barWidth = $maxSubmissions > 0 ? ($submissionCount / $maxSubmissions) * 100 : 0)
+                        <div class="grid gap-2 sm:grid-cols-[minmax(9rem,0.7fr)_minmax(0,1.3fr)_4rem] sm:items-center" role="listitem">
+                            <span class="truncate text-sm font-semibold text-slate-800" title="{{ $school->name }}">{{ $school->name }}</span>
+                            <div class="h-3 overflow-hidden rounded-full bg-slate-100" role="progressbar" aria-label="Jawaban terkumpul di {{ $school->name }}" aria-valuemin="0" aria-valuemax="{{ $maxSubmissions }}" aria-valuenow="{{ $submissionCount }}">
+                                <div class="h-full rounded-full bg-indigo-600 transition-[width] duration-500" style="width: {{ $barWidth }}%"></div>
+                            </div>
+                            <span class="text-sm font-bold tabular-nums text-slate-900 sm:text-right">{{ number_format($submissionCount, 0, ',', '.') }}</span>
+                        </div>
+                    @endforeach
+                </div>
+                <p class="mt-5 border-t border-slate-100 pt-4 text-xs leading-5 text-slate-500">Jumlah terkumpul menunjukkan aktivitas, bukan tingkat keberhasilan. Lihat rata-rata nilai pada tabel untuk membaca hasil belajar.</p>
+            @endif
+        </section>
+
         <section class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm" aria-labelledby="school-comparison-title" data-reveal>
             <div class="border-b border-slate-100 p-5 sm:p-6">
                 <p class="text-sm font-bold uppercase tracking-[0.1em] text-teal-700">Perbandingan institusi</p>

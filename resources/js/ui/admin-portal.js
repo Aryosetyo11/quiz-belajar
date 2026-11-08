@@ -247,6 +247,170 @@ export function initializeAdminPortal() {
 
     renderChart();
 
+    const accountDetails = [...document.querySelectorAll('[data-admin-user-details]')];
+    accountDetails.forEach((details) => {
+        details.addEventListener('toggle', () => {
+            if (!details.open) {
+                return;
+            }
+
+            accountDetails.forEach((otherDetails) => {
+                if (otherDetails !== details) {
+                    otherDetails.open = false;
+                }
+            });
+        });
+    });
+
+    const createUserModal = document.querySelector('#create-user-modal');
+    const importUsersModal = document.querySelector('#import-users-modal');
+    const openCreateUserModal = () => {
+        if (createUserModal instanceof HTMLDialogElement && !createUserModal.open) {
+            createUserModal.showModal();
+        }
+    };
+    const closeCreateUserModal = () => {
+        if (createUserModal instanceof HTMLDialogElement && createUserModal.open) {
+            createUserModal.close();
+        }
+    };
+
+    document.querySelectorAll('[data-open-create-user-modal]').forEach((button) => {
+        button.addEventListener('click', openCreateUserModal);
+    });
+    document.querySelectorAll('[data-close-create-user-modal]').forEach((button) => {
+        button.addEventListener('click', closeCreateUserModal);
+    });
+    const openImportUsersModal = () => {
+        if (importUsersModal instanceof HTMLDialogElement && !importUsersModal.open) {
+            importUsersModal.showModal();
+        }
+    };
+    const closeImportUsersModal = () => {
+        if (importUsersModal instanceof HTMLDialogElement && importUsersModal.open) {
+            importUsersModal.close();
+        }
+    };
+
+    document.querySelectorAll('[data-open-import-user-modal]').forEach((button) => {
+        button.addEventListener('click', openImportUsersModal);
+    });
+    document.querySelectorAll('[data-close-import-user-modal]').forEach((button) => {
+        button.addEventListener('click', closeImportUsersModal);
+    });
+    importUsersModal?.addEventListener('click', (event) => {
+        if (event.target === importUsersModal) {
+            closeImportUsersModal();
+        }
+    });
+    createUserModal?.addEventListener('click', (event) => {
+        if (event.target === createUserModal) {
+            closeCreateUserModal();
+        }
+    });
+
+    if (createUserModal instanceof HTMLDialogElement && createUserModal.dataset.openOnLoad === 'true') {
+        createUserModal.showModal();
+    }
+    if (importUsersModal instanceof HTMLDialogElement && importUsersModal.dataset.openOnLoad === 'true') {
+        importUsersModal.showModal();
+    }
+
+    const schoolModal = document.querySelector('#create-school-modal');
+    const createClassroomModal = document.querySelector('#create-classroom-modal');
+    const editClassroomModal = document.querySelector('#edit-classroom-modal');
+    const showDialog = (dialog) => {
+        if (dialog instanceof HTMLDialogElement && !dialog.open) {
+            dialog.showModal();
+        }
+    };
+    const closeDialog = (dialog) => {
+        if (dialog instanceof HTMLDialogElement && dialog.open) {
+            dialog.close();
+        }
+    };
+
+    document.querySelectorAll('[data-open-school-modal]').forEach((button) => {
+        button.addEventListener('click', () => showDialog(schoolModal));
+    });
+    document.querySelectorAll('[data-close-school-modal]').forEach((button) => {
+        button.addEventListener('click', () => closeDialog(schoolModal));
+    });
+    document.querySelectorAll('[data-open-classroom-modal]').forEach((button) => {
+        button.addEventListener('click', () => {
+            const form = document.querySelector('#create-classroom-form');
+            const schoolId = document.querySelector('#create-classroom-school-id');
+            const schoolName = document.querySelector('[data-create-classroom-school-name]');
+
+            if (form) {
+                form.action = button.dataset.createAction;
+            }
+            if (schoolId) {
+                schoolId.value = button.dataset.schoolId;
+            }
+            if (schoolName) {
+                schoolName.textContent = button.dataset.schoolName;
+            }
+
+            showDialog(createClassroomModal);
+        });
+    });
+    document.querySelectorAll('[data-close-classroom-modal]').forEach((button) => {
+        button.addEventListener('click', () => closeDialog(createClassroomModal));
+    });
+    document.querySelectorAll('[data-open-edit-classroom-modal]').forEach((button) => {
+        button.addEventListener('click', () => {
+            const form = document.querySelector('#edit-classroom-form');
+            const classroomId = document.querySelector('#edit-classroom-id');
+            const classroomName = document.querySelector('#edit-classroom-name');
+            const classroomLevel = document.querySelector('#edit-classroom-level');
+
+            if (form) {
+                form.action = button.dataset.editAction;
+            }
+            if (classroomId) {
+                classroomId.value = button.dataset.classroomId;
+            }
+            if (classroomName) {
+                classroomName.value = button.dataset.classroomName;
+            }
+            if (classroomLevel) {
+                classroomLevel.value = button.dataset.classroomLevel;
+            }
+
+            showDialog(editClassroomModal);
+        });
+    });
+    document.querySelectorAll('[data-close-edit-classroom-modal]').forEach((button) => {
+        button.addEventListener('click', () => closeDialog(editClassroomModal));
+    });
+
+    [schoolModal, createClassroomModal, editClassroomModal].forEach((dialog) => {
+        dialog?.addEventListener('click', (event) => {
+            if (event.target === dialog) {
+                closeDialog(dialog);
+            }
+        });
+    });
+
+    if (createClassroomModal instanceof HTMLDialogElement && createClassroomModal.dataset.openOnLoad === 'true') {
+        const classroomForm = document.querySelector('#create-classroom-form');
+        if (classroomForm && createClassroomModal.dataset.defaultAction) {
+            classroomForm.action = createClassroomModal.dataset.defaultAction;
+        }
+        showDialog(createClassroomModal);
+    }
+    if (editClassroomModal instanceof HTMLDialogElement && editClassroomModal.dataset.openOnLoad === 'true') {
+        const editForm = document.querySelector('#edit-classroom-form');
+        if (editForm && editClassroomModal.dataset.defaultAction) {
+            editForm.action = editClassroomModal.dataset.defaultAction;
+        }
+        showDialog(editClassroomModal);
+    }
+    if (schoolModal instanceof HTMLDialogElement && schoolModal.dataset.openOnLoad === 'true') {
+        showDialog(schoolModal);
+    }
+
     document.querySelectorAll('[data-admin-delete-form]').forEach((form) => {
         form.addEventListener('submit', (event) => {
             const accountName = form.dataset.accountName;

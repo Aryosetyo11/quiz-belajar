@@ -4,21 +4,71 @@
 
 @section('content')
 <div class="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between" data-reveal>
-    <div><p class="text-sm font-bold uppercase tracking-[0.1em] text-teal-800">Akses portal</p><h1 class="mt-1 text-3xl font-bold tracking-tight text-slate-950 sm:text-4xl">Manajemen akun</h1><p class="mt-2 max-w-2xl text-base leading-7 text-slate-600">Buat dan perbarui akun guru, siswa, serta admin yayasan.</p></div>
-    <a href="{{ route('remote.dashboard') }}" class="text-sm font-bold text-teal-800 underline-offset-4 hover:underline">← Kembali ke ringkasan</a>
+    <div><p class="text-sm font-bold uppercase tracking-[0.1em] text-teal-800">Akses portal</p><h1 class="mt-1 text-3xl font-bold tracking-tight text-slate-950 sm:text-4xl">Pengguna</h1><p class="mt-2 max-w-2xl text-base leading-7 text-slate-600">Kelola akun guru dan siswa, atur sekolah, atau perbarui data akses.</p></div>
+    <div class="flex flex-wrap items-center gap-3">
+        <button type="button" data-open-import-user-modal class="inline-flex items-center justify-center rounded-xl bg-teal-800 px-4 py-2.5 text-sm font-bold text-white transition hover:bg-teal-900 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-teal-200">Impor akun</button>
+        <button type="button" data-open-create-user-modal class="inline-flex items-center justify-center rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-sm font-bold text-slate-800 transition hover:border-teal-700 hover:bg-teal-50 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-teal-100">Buat akun manual</button>
+        <a href="{{ route('remote.dashboard') }}" class="text-sm font-bold text-teal-800 underline-offset-4 hover:underline">← Kembali ke ringkasan</a>
+    </div>
 </div>
 
-
-
-<section id="buat-akun" class="mt-6 scroll-mt-6 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm sm:p-8" data-reveal>
-    <div class="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-        <div>
-            <p class="text-sm font-bold uppercase tracking-[0.1em] text-teal-800">Tambah akses portal</p>
-            <h2 class="mt-1 text-2xl font-bold tracking-tight text-slate-950">Buat akun baru</h2>
-            <p class="mt-2 max-w-2xl text-base leading-7 text-slate-600">Tentukan akses yang dibutuhkan, isi identitas masuk, lalu buat password awal untuk akun tersebut.</p>
+<dialog id="import-users-modal" data-open-on-load="{{ $errors->has('file') || $errors->has('import_school_id') ? 'true' : 'false' }}" class="fixed inset-0 m-auto max-h-[92dvh] w-[calc(100%-1.5rem)] max-w-2xl overflow-y-auto rounded-2xl border border-slate-200 bg-white p-0 shadow-2xl backdrop:bg-slate-950/55 backdrop:backdrop-blur-sm">
+    <div class="p-5 sm:p-7">
+        <div class="mb-5 flex items-start justify-between gap-4 border-b border-slate-100 pb-4">
+            <div>
+                <p class="text-sm font-bold uppercase tracking-[0.1em] text-teal-800">Impor massal</p>
+                <h2 id="import-users-title" class="mt-1 text-2xl font-bold tracking-tight text-slate-950">Tambah banyak akun</h2>
+                <p class="mt-1 text-sm leading-6 text-slate-600">Pilih sekolah tujuan dan unggah file Excel atau CSV.</p>
+            </div>
+            <button type="button" data-close-import-user-modal class="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-lg text-2xl leading-none text-slate-500 transition hover:bg-slate-100 hover:text-slate-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-600" aria-label="Tutup modal">&times;</button>
         </div>
-        <span class="rounded-lg bg-slate-100 px-3 py-2 text-base font-semibold text-slate-700">Password minimal 12 karakter</span>
+
+        <div class="mb-5 flex flex-wrap items-center justify-between gap-3 rounded-xl bg-slate-50 px-4 py-3">
+            <p class="text-sm text-slate-700">Belum punya format file?</p>
+            <a href="{{ route('admin.users.template') }}" class="text-sm font-bold text-teal-800 underline underline-offset-4 hover:text-teal-950">Unduh template CSV</a>
+        </div>
+
+        @if ($errors->has('file') || $errors->has('import_school_id'))
+            <div class="mb-5 rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm leading-6 text-rose-900" role="alert">
+                @foreach ($errors->get('file') as $message)<p>{{ $message }}</p>@endforeach
+                @foreach ($errors->get('import_school_id') as $message)<p>{{ $message }}</p>@endforeach
+            </div>
+        @endif
+
+        <form method="POST" action="{{ route('admin.users.import') }}" enctype="multipart/form-data" class="space-y-4">
+            @csrf
+            <label for="import-school" class="block text-sm font-semibold text-slate-800">Sekolah tujuan
+                <select id="import-school" name="import_school_id" required class="mt-1.5 w-full rounded-xl border-slate-300 bg-white px-3 py-3 text-base focus:border-teal-600 focus:ring-teal-600">
+                    <option value="">Pilih sekolah</option>
+                    @foreach ($schools as $school)<option value="{{ $school->id }}" @selected(old('import_school_id') == $school->id)>{{ $school->name }}</option>@endforeach
+                </select>
+            </label>
+            <label for="users-import-file" class="block text-sm font-semibold text-slate-800">File akun (.xlsx atau .csv)
+                <input id="users-import-file" type="file" name="file" accept=".xlsx,.csv" required class="mt-1.5 block w-full rounded-xl border border-slate-300 bg-white text-sm text-slate-700 file:mr-4 file:border-0 file:bg-slate-100 file:px-4 file:py-3 file:text-sm file:font-bold file:text-slate-800 hover:file:bg-slate-200 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-teal-100" />
+            </label>
+            <div class="rounded-xl border border-slate-200 px-4 py-3 text-sm leading-6 text-slate-600">
+                <p><span class="font-semibold text-slate-800">Kolom wajib:</span> role, nama, email, nisn, password. Role diisi <code class="rounded bg-slate-100 px-1.5 py-0.5">guru</code> atau <code class="rounded bg-slate-100 px-1.5 py-0.5">siswa</code>.</p>
+                <p class="mt-2">Password minimal 12 karakter. Email guru dan NISN siswa harus unik. Semua akun di file akan masuk ke sekolah yang dipilih.</p>
+                <p class="mt-2">Kolom bidang mapel hanya catatan; penugasan guru diatur di menu Penugasan.</p>
+            </div>
+            <div class="flex flex-col-reverse gap-3 border-t border-slate-100 pt-4 sm:flex-row sm:justify-end">
+                <button type="button" data-close-import-user-modal class="rounded-xl border border-slate-300 px-4 py-2.5 text-sm font-bold text-slate-700 transition hover:bg-slate-50">Batal</button>
+                <button type="submit" @disabled($schools->isEmpty()) class="rounded-xl bg-teal-800 px-5 py-2.5 text-sm font-bold text-white transition hover:bg-teal-900 disabled:cursor-not-allowed disabled:opacity-50">Impor akun</button>
+            </div>
+        </form>
     </div>
+</dialog>
+
+<dialog id="create-user-modal" data-open-on-load="{{ request('action') === 'create' || ($errors->any() && old('role') !== null && ! $errors->has('file') && ! $errors->has('import_school_id')) ? 'true' : 'false' }}" class="fixed inset-0 m-auto max-h-[92dvh] w-[calc(100%-1.5rem)] max-w-4xl overflow-y-auto rounded-2xl border border-slate-200 bg-white p-0 shadow-2xl backdrop:bg-slate-950/55 backdrop:backdrop-blur-sm">
+    <div class="p-5 sm:p-7">
+        <div class="mb-5 flex items-start justify-between gap-4 border-b border-slate-100 pb-4">
+            <div>
+                <p class="text-sm font-bold uppercase tracking-[0.1em] text-teal-800">Tambah satu akun</p>
+                <h2 id="create-user-modal-title" class="mt-1 text-2xl font-bold tracking-tight text-slate-950">Buat akun manual</h2>
+                <p class="mt-1 text-sm leading-6 text-slate-600">Isi data akun khusus tanpa mengunggah file.</p>
+            </div>
+            <button type="button" data-close-create-user-modal class="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-lg text-2xl leading-none text-slate-500 transition hover:bg-slate-100 hover:text-slate-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-600" aria-label="Tutup modal">&times;</button>
+        </div>
 
     @if ($errors->any())
         <div class="mt-5 rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-base leading-7 text-rose-900" role="alert">
@@ -116,11 +166,12 @@
             <button type="submit" class="inline-flex items-center justify-center rounded-xl bg-teal-800 px-5 py-3 text-base font-bold text-white transition hover:bg-teal-900 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-teal-200">Simpan akun</button>
         </div>
     </form>
-</section>
+    </div>
+</dialog>
 
 <section class="mt-6 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6" data-reveal>
     <div class="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
-        <div><p class="text-sm font-bold uppercase tracking-[0.1em] text-violet-700">Direktori</p><h2 class="mt-1 text-xl font-bold text-slate-950">Akun terdaftar <span class="text-sm font-semibold text-slate-500">({{ $users->total() }})</span></h2></div>
+        <div><p class="text-sm font-bold uppercase tracking-[0.1em] text-violet-700">Direktori akun</p><h2 class="mt-1 text-2xl font-bold text-slate-950">Pengguna terdaftar <span class="text-base font-semibold text-slate-500">({{ $users->total() }})</span></h2><p class="mt-1 text-sm text-slate-600">Cari, filter, edit, atau hapus akun yang sudah dibuat.</p></div>
         <form method="GET" action="{{ route('admin.users') }}" class="grid gap-2 sm:grid-cols-[minmax(200px,1fr)_160px_200px_210px_auto]" data-admin-user-filter>
             <label class="sr-only" for="user-search">Cari akun</label><input id="user-search" name="q" type="search" value="{{ request('q') }}" placeholder="Cari nama, email, atau NISN" class="rounded-xl border-slate-300 text-sm focus:border-teal-600 focus:ring-teal-600" />
             <label class="sr-only" for="role-filter">Filter peran</label><select id="role-filter" name="role" class="rounded-xl border-slate-300 text-sm focus:border-teal-600 focus:ring-teal-600"><option value="">Semua peran</option><option value="guru" @selected(request('role') === 'guru')>Guru</option><option value="siswa" @selected(request('role') === 'siswa')>Siswa</option><option value="admin_remote" @selected(request('role') === 'admin_remote')>All Remote</option><option value="admin_yayasan" @selected(request('role') === 'admin_yayasan')>Yayasan</option></select>
@@ -132,23 +183,50 @@
 
     <div class="mt-5 space-y-4">
         @forelse ($users as $user)
-            <article class="rounded-2xl border border-slate-200 p-4 transition hover:border-teal-200 hover:bg-teal-50/30 sm:p-5" data-admin-user-card>
-                <div class="flex flex-col gap-4 xl:flex-row xl:items-start xl:justify-between">
-                    <div class="min-w-0"><div class="flex flex-wrap items-center gap-2"><h3 class="font-bold text-slate-950">{{ $user->name }}</h3><span class="rounded-full px-2.5 py-1 text-xs font-bold {{ $user->role === 'siswa' ? 'bg-orange-100 text-orange-800' : ($user->role === 'guru' ? 'bg-teal-100 text-teal-800' : 'bg-violet-100 text-violet-800') }}">{{ ['guru' => 'Guru', 'siswa' => 'Siswa', 'admin_remote' => 'All Remote', 'admin_yayasan' => 'Yayasan'][$user->role] ?? $user->role }}</span>@if (auth()->user()->is($user))<span class="text-xs font-semibold text-slate-500">Akun Anda</span>@endif</div><p class="mt-1 break-all text-sm text-slate-600">{{ $user->email ?? 'NISN '.$user->nisn }}</p>@if ($user->school)<p class="mt-1 text-sm font-medium text-indigo-700">{{ $user->school->name }}</p>@endif</div>
-                    <form method="POST" action="{{ route('admin.users.update', $user) }}" class="grid flex-1 gap-3 sm:grid-cols-2 xl:max-w-2xl">
+            <details class="group rounded-2xl border border-slate-200 bg-white transition-colors open:border-teal-300 open:shadow-sm hover:border-slate-300" name="admin-user-account" data-admin-user-details @if ((string) old('_editing_user_id') === (string) $user->id) open @endif>
+                <summary class="flex cursor-pointer list-none items-center justify-between gap-4 rounded-2xl p-4 outline-none transition-colors hover:bg-slate-50 focus-visible:ring-4 focus-visible:ring-inset focus-visible:ring-teal-100 sm:px-5 sm:py-4">
+                    <span class="min-w-0">
+                        <span class="flex flex-wrap items-center gap-2">
+                            <span class="truncate text-base font-bold text-slate-950 sm:text-lg">{{ $user->name }}</span>
+                            <span class="rounded-full px-2.5 py-1 text-xs font-bold {{ $user->role === 'siswa' ? 'bg-orange-100 text-orange-800' : ($user->role === 'guru' ? 'bg-teal-100 text-teal-800' : 'bg-violet-100 text-violet-800') }}">{{ ['guru' => 'Guru', 'siswa' => 'Siswa', 'admin_remote' => 'All Remote', 'admin_yayasan' => 'Yayasan'][$user->role] ?? $user->role }}</span>
+                            @if (auth()->user()->is($user))<span class="text-xs font-semibold text-slate-500">Akun Anda</span>@endif
+                        </span>
+                        <span class="mt-1 block truncate text-sm text-slate-600">{{ $user->email ?? 'NISN '.$user->nisn }}@if ($user->school)<span class="text-slate-400"> · </span>{{ $user->school->name }}@endif</span>
+                    </span>
+                    <span class="flex shrink-0 items-center gap-2 text-sm font-semibold text-slate-600">
+                        <span class="hidden sm:inline group-open:hidden">Kelola akun</span>
+                        <span class="hidden sm:group-open:inline">Tutup detail</span>
+                        <svg class="h-5 w-5 transition-transform duration-200 group-open:rotate-180" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="m5 7.5 5 5 5-5" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" /></svg>
+                    </span>
+                </summary>
+
+                <div class="border-t border-slate-100 px-4 pb-5 pt-5 sm:px-5">
+                    @if ((string) old('_editing_user_id') === (string) $user->id && $errors->any())
+                        <div class="mb-4 rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm leading-6 text-rose-900" role="alert">
+                            @foreach ($errors->all() as $message)<p>{{ $message }}</p>@endforeach
+                        </div>
+                    @endif
+                    <form method="POST" action="{{ route('admin.users.update', $user) }}" class="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
                         @csrf @method('PUT')
-                        <label class="text-xs font-semibold text-slate-600">Nama<input name="name" value="{{ $user->name }}" required maxlength="255" class="mt-1 w-full rounded-lg border-slate-300 text-sm focus:border-teal-600 focus:ring-teal-600" /></label>
-                        @if ($user->role === 'siswa')<label class="text-xs font-semibold text-slate-600">NISN<input name="nisn" value="{{ $user->nisn }}" inputmode="numeric" pattern="[0-9]{10}" maxlength="10" required class="mt-1 w-full rounded-lg border-slate-300 text-sm focus:border-teal-600 focus:ring-teal-600" /></label>@else<label class="text-xs font-semibold text-slate-600">Email<input name="email" type="email" value="{{ $user->email }}" required class="mt-1 w-full rounded-lg border-slate-300 text-sm focus:border-teal-600 focus:ring-teal-600" /></label>@endif
-                        @if (in_array($user->role, ['guru', 'siswa'], true))<label class="text-xs font-semibold text-slate-600 sm:col-span-2">Sekolah<select name="school_id" required class="mt-1 w-full rounded-lg border-slate-300 bg-white text-sm focus:border-teal-600 focus:ring-teal-600">@foreach ($schools as $school)<option value="{{ $school->id }}" @selected((int) $user->school_id === (int) $school->id)>{{ $school->name }}</option>@endforeach</select><span class="mt-1 block font-normal text-slate-500">Siswa hanya bisa dipindahkan setelah dikeluarkan dari rombel. Guru hanya bisa dipindahkan setelah penugasan mapelnya dialihkan.</span></label>@endif
-                        <label class="text-xs font-semibold text-slate-600 sm:col-span-2">Password baru <span class="font-normal">(kosongkan jika tidak diganti)</span><input name="password" type="password" minlength="12" autocomplete="new-password" class="mt-1 w-full rounded-lg border-slate-300 text-sm focus:border-teal-600 focus:ring-teal-600" /></label>
-                        <label class="text-xs font-semibold text-slate-600 sm:col-span-2">Ulangi password baru<input name="password_confirmation" type="password" minlength="12" autocomplete="new-password" class="mt-1 w-full rounded-lg border-slate-300 text-sm focus:border-teal-600 focus:ring-teal-600" /></label>
-                        <div class="flex flex-wrap items-center gap-3 sm:col-span-2"><button class="rounded-lg bg-teal-800 px-4 py-2 text-sm font-bold text-white transition hover:bg-teal-900">Simpan perubahan</button><span class="text-xs text-slate-500">Peran dipertahankan untuk menjaga relasi kelas.</span></div>
+                        <input type="hidden" name="_editing_user_id" value="{{ $user->id }}" />
+                        <label class="text-sm font-semibold text-slate-700">Nama<input name="name" value="{{ (string) old('_editing_user_id') === (string) $user->id ? old('name', $user->name) : $user->name }}" required maxlength="255" class="mt-1.5 w-full rounded-lg border-slate-300 text-base focus:border-teal-600 focus:ring-teal-600" /></label>
+                        @if ($user->role === 'siswa')<label class="text-sm font-semibold text-slate-700">NISN<input name="nisn" value="{{ (string) old('_editing_user_id') === (string) $user->id ? old('nisn', $user->nisn) : $user->nisn }}" inputmode="numeric" pattern="[0-9]{10}" maxlength="10" required class="mt-1.5 w-full rounded-lg border-slate-300 text-base focus:border-teal-600 focus:ring-teal-600" /></label>@else<label class="text-sm font-semibold text-slate-700">Email<input name="email" type="email" value="{{ (string) old('_editing_user_id') === (string) $user->id ? old('email', $user->email) : $user->email }}" required class="mt-1.5 w-full rounded-lg border-slate-300 text-base focus:border-teal-600 focus:ring-teal-600" /></label>@endif
+                        @if (in_array($user->role, ['guru', 'siswa'], true))
+                            <label class="text-sm font-semibold text-slate-700 sm:col-span-2 xl:col-span-1">Sekolah<select name="school_id" required class="mt-1.5 w-full rounded-lg border-slate-300 bg-white text-base focus:border-teal-600 focus:ring-teal-600">@foreach ($schools as $school)<option value="{{ $school->id }}" @selected((int) ((string) old('_editing_user_id') === (string) $user->id ? old('school_id', $user->school_id) : $user->school_id) === (int) $school->id)>{{ $school->name }}</option>@endforeach</select></label>
+                        @endif
+                        <label class="text-sm font-semibold text-slate-700">Password baru <span class="font-normal text-slate-500">(opsional)</span><input name="password" type="password" minlength="12" autocomplete="new-password" class="mt-1.5 w-full rounded-lg border-slate-300 text-base focus:border-teal-600 focus:ring-teal-600" /></label>
+                        <label class="text-sm font-semibold text-slate-700">Ulangi password baru<input name="password_confirmation" type="password" minlength="12" autocomplete="new-password" class="mt-1.5 w-full rounded-lg border-slate-300 text-base focus:border-teal-600 focus:ring-teal-600" /></label>
+                        <p class="self-end text-sm leading-6 text-slate-500">Peran akun dipertahankan agar relasi kelas tetap aman.</p>
+                        <div class="flex flex-wrap items-center justify-between gap-3 border-t border-slate-100 pt-4 sm:col-span-2 xl:col-span-3">
+                            <button type="submit" class="rounded-lg bg-teal-800 px-4 py-2.5 text-sm font-bold text-white transition hover:bg-teal-900">Simpan perubahan</button>
+                        </div>
                     </form>
-                    <form method="POST" action="{{ route('admin.users.destroy', $user) }}" data-admin-delete-form data-account-name="{{ $user->name }}">
-                        @csrf @method('DELETE')<button type="submit" @disabled(auth()->user()->is($user)) class="rounded-lg border border-rose-200 px-3 py-2 text-sm font-bold text-rose-800 transition hover:bg-rose-50 disabled:cursor-not-allowed disabled:opacity-40" title="Hapus akun">Hapus</button>
+                    <form method="POST" action="{{ route('admin.users.destroy', $user) }}" class="mt-3 flex justify-end" data-admin-delete-form data-account-name="{{ $user->name }}">
+                        @csrf @method('DELETE')
+                        <button type="submit" @disabled(auth()->user()->is($user)) class="rounded-lg border border-rose-200 px-4 py-2.5 text-sm font-bold text-rose-800 transition hover:bg-rose-50 disabled:cursor-not-allowed disabled:opacity-40" title="Hapus akun">Hapus akun</button>
                     </form>
                 </div>
-            </article>
+            </details>
         @empty
             <div class="rounded-xl border border-dashed border-slate-300 bg-slate-50 p-8 text-center"><p class="font-semibold text-slate-800">Tidak ada akun yang cocok.</p><a href="{{ route('admin.users') }}" class="mt-2 inline-block text-sm font-bold text-teal-800 underline">Hapus filter</a></div>
         @endforelse

@@ -37,9 +37,14 @@ class FoundationSchoolReportController extends Controller
             $schoolRows = $schoolRows->where('id', $filters['school_id'])->values();
         }
 
+        $activitySchools = $schoolRows
+            ->sortByDesc(fn (School $school): int => (int) ($school->exam_report->submitted_attempts_count ?? 0))
+            ->values();
+
         return view('portal.foundation-reports', [
             'filters' => $filters,
             'schools' => $schoolRows,
+            'activitySchools' => $activitySchools,
             'reportSchools' => School::query()->orderBy('name')->get(['id', 'name']),
             'metrics' => $reports->metrics($filters['from'], $filters['to'], $filters['school_id']),
         ]);

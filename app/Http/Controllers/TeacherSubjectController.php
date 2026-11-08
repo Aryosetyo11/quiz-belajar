@@ -173,17 +173,6 @@ class TeacherSubjectController extends Controller
         }
 
         if ($subject->classroom_id !== null) {
-            $classroom = $subject->classroom;
-            $alreadyInAnotherClass = $student->classrooms()
-                ->where('classrooms.school_id', $classroom->school_id)
-                ->where('classrooms.academic_year', $classroom->academic_year)
-                ->where('classrooms.id', '<>', $classroom->id)
-                ->exists();
-
-            if ($alreadyInAnotherClass) {
-                return back()->withErrors(['student_id' => 'Siswa sudah terdaftar di rombel lain pada tahun ajaran ini. Minta admin memindahkannya terlebih dahulu.'])->withInput();
-            }
-
             DB::transaction(function () use ($subject, $student): void {
                 $classroom = $subject->classroom()->firstOrFail();
                 $classroom->students()->syncWithoutDetaching([$student->id]);

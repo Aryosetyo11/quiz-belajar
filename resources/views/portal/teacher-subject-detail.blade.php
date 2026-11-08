@@ -318,7 +318,7 @@
                 </span>
                 <div>
                     <h3 id="enroll-modal-title" class="text-base font-bold text-slate-900">Daftarkan Siswa ke Kelas</h3>
-                    <p class="text-sm text-slate-500">Pilih dari database siswa sekolah atau masukkan NISN</p>
+                    <p class="text-sm text-slate-500">Siswa boleh terdaftar di beberapa rombel dalam sekolah yang sama.</p>
                 </div>
             </div>
             <button type="button" onclick="closeEnrollModal()" class="rounded-lg p-1 text-slate-400 hover:bg-slate-100 hover:text-slate-600">
@@ -329,7 +329,7 @@
         <div class="mt-4 space-y-4">
             {{-- Metode 1: Cari dari Direktori Sekolah --}}
             <div>
-                <label for="enroll-search-input" class="block text-sm font-bold text-slate-700">1. Pilih dari Siswa Sekolah yang Belum Masuk Kelas</label>
+                <label for="enroll-search-input" class="block text-sm font-bold text-slate-700">1. Pilih siswa yang belum terdaftar di rombel ini</label>
                 <div class="relative mt-1.5">
                     <span class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3 text-slate-400">
                         <svg class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>

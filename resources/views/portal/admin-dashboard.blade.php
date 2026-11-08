@@ -11,7 +11,7 @@
     </div>
     @if (! $isFoundationAdmin)
         <div class="flex shrink-0 flex-wrap gap-2">
-            <a href="{{ route('admin.users') }}#buat-akun" class="inline-flex items-center justify-center gap-2 rounded-xl bg-indigo-700 px-4 py-3 text-sm font-semibold text-white shadow-sm transition hover:-translate-y-0.5 hover:bg-indigo-800 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-indigo-200">Tambah akun <span aria-hidden="true">&rarr;</span></a>
+            <a href="{{ route('admin.users', ['action' => 'create']) }}" class="inline-flex items-center justify-center gap-2 rounded-xl bg-indigo-700 px-4 py-3 text-sm font-semibold text-white shadow-sm transition hover:-translate-y-0.5 hover:bg-indigo-800 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-indigo-200">Tambah akun <span aria-hidden="true">&rarr;</span></a>
             <a href="{{ route('admin.schools') }}" class="inline-flex items-center justify-center rounded-xl border border-slate-300 bg-white px-4 py-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-50">Sekolah & rombel</a>
             <a href="{{ route('admin.exam-sessions') }}" class="inline-flex items-center justify-center rounded-xl border border-slate-300 bg-white px-4 py-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-50">Sesi ujian</a>
         </div>

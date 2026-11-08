@@ -34,13 +34,60 @@ class TeacherQuestionBankController extends Controller
             || $exam->sessionsUsingAsBankPackage()->where(function (Builder $query): void {
                 $query->where('is_published', true)->orWhereHas('attempts');
             })->exists();
+        $canDeletePackage = ! $exam->is_published
+            && (int) $exam->attempts_count === 0
+            && ! $exam->sessionsUsingAsBankPackage()->exists();
 
         return view('portal.teacher-question-bank-package', [
             'package' => $exam,
             'questions' => $questions,
             'isPackageLocked' => $isPackageLocked,
+            'canDeletePackage' => $canDeletePackage,
             'questionBankRoutePrefix' => $this->routePrefix($request),
         ]);
+    }
+
+    public function updatePackage(Request $request, Exam $exam): RedirectResponse
+    {
+        $package = $this->visiblePackages($request)->whereKey($exam->id)->firstOrFail();
+        $validated = $request->validate([
+            'title' => ['required', 'string', 'max:160'],
+        ]);
+
+        $package->update(['title' => trim($validated['title'])]);
+
+        return redirect()->route($this->routePrefix($request).'.package', $package)
+            ->with('status', 'Nama paket berhasil diperbarui.');
+    }
+
+    public function destroyPackage(Request $request, Exam $exam): RedirectResponse
+    {
+        $package = $this->visiblePackages($request)->whereKey($exam->id)->firstOrFail();
+        $wasDeleted = DB::transaction(function () use ($request, $package): bool {
+            $lockedPackage = $this->visiblePackages($request)
+                ->whereKey($package->id)
+                ->lockForUpdate()
+                ->firstOrFail();
+
+            if ($lockedPackage->is_published
+                || $lockedPackage->attempts()->exists()
+                || $lockedPackage->sessionsUsingAsBankPackage()->exists()) {
+                return false;
+            }
+
+            $lockedPackage->delete();
+
+            return true;
+        });
+
+        if (! $wasDeleted) {
+            return back()->withErrors([
+                'package' => 'Paket tidak dapat dihapus karena sudah dipakai atau terhubung ke sesi ujian. Hapus sesi ujian terkait terlebih dahulu.',
+            ]);
+        }
+
+        return redirect()->route($this->routePrefix($request))
+            ->with('status', 'Paket bank soal beserta semua soalnya berhasil dihapus.');
     }
 
     public function storePackageQuestion(Request $request, Exam $exam): RedirectResponse
@@ -301,10 +348,6 @@ class TeacherQuestionBankController extends Controller
             return back()->withErrors(['file' => $exception->getMessage()])->withInput();
         }
 
-        if ($exam !== null && $exam->questions()->count() + count($questions) > 100) {
-            return back()->withErrors(['file' => 'Paket maksimal berisi 100 soal.'])->withInput();
-        }
-
         DB::transaction(function () use ($validated, $questions, $subject, &$exam): void {
             if ($exam === null) {
                 $exam = $subject->exams()->create([
@@ -340,17 +383,17 @@ class TeacherQuestionBankController extends Controller
     public function destroy(Request $request, ExamQuestion $question): RedirectResponse
     {
         $question->load('exam.subject');
+        $exam = $question->exam;
         abort_unless($this->visiblePackages($request)->whereKey($question->exam_id)->exists(), 404);
 
-        if ($question->exam->is_published || $question->exam->attempts()->exists() || $question->exam->sessionsUsingAsBankPackage()->where(function ($query): void {
+        if ($exam->is_published || $exam->attempts()->exists() || $exam->sessionsUsingAsBankPackage()->where(function ($query): void {
             $query->where('is_published', true)->orWhereHas('attempts');
         })->exists()) {
             return redirect()->route($this->routePrefix($request))
                 ->withErrors(['question' => 'Soal dari ujian yang sudah dipublikasikan atau mulai dikerjakan tidak dapat dihapus.']);
         }
 
-        DB::transaction(function () use ($question): void {
-            $exam = $question->exam;
+        DB::transaction(function () use ($question, $exam): void {
             $position = $question->position;
             $question->delete();
 

@@ -66,6 +66,12 @@ Route::middleware('auth')->group(function (): void {
     Route::get('/admin/pengguna', [AdminUserController::class, 'index'])
         ->middleware('role:admin_remote')
         ->name('admin.users');
+    Route::get('/admin/pengguna/template', [AdminUserController::class, 'template'])
+        ->middleware('role:admin_remote')
+        ->name('admin.users.template');
+    Route::post('/admin/pengguna/impor', [AdminUserController::class, 'import'])
+        ->middleware('role:admin_remote')
+        ->name('admin.users.import');
     Route::post('/admin/pengguna', [AdminUserController::class, 'store'])
         ->middleware('role:admin_remote')
         ->name('admin.users.store');
@@ -126,6 +132,12 @@ Route::middleware('auth')->group(function (): void {
     Route::get('/admin/bank-soal/paket/{exam}', [TeacherQuestionBankController::class, 'showPackage'])
         ->middleware('role:admin_remote')
         ->name('admin.question-bank.package');
+    Route::put('/admin/bank-soal/paket/{exam}', [TeacherQuestionBankController::class, 'updatePackage'])
+        ->middleware('role:admin_remote')
+        ->name('admin.question-bank.package.update');
+    Route::delete('/admin/bank-soal/paket/{exam}', [TeacherQuestionBankController::class, 'destroyPackage'])
+        ->middleware('role:admin_remote')
+        ->name('admin.question-bank.package.destroy');
     Route::post('/admin/bank-soal/paket/{exam}/soal', [TeacherQuestionBankController::class, 'storePackageQuestion'])
         ->middleware('role:admin_remote')
         ->name('admin.question-bank.package.questions.store');
@@ -199,6 +211,12 @@ Route::middleware('auth')->group(function (): void {
     Route::get('/guru/bank-soal/paket/{exam}', [TeacherQuestionBankController::class, 'showPackage'])
         ->middleware('role:guru')
         ->name('teacher.question-bank.package');
+    Route::put('/guru/bank-soal/paket/{exam}', [TeacherQuestionBankController::class, 'updatePackage'])
+        ->middleware('role:guru')
+        ->name('teacher.question-bank.package.update');
+    Route::delete('/guru/bank-soal/paket/{exam}', [TeacherQuestionBankController::class, 'destroyPackage'])
+        ->middleware('role:guru')
+        ->name('teacher.question-bank.package.destroy');
     Route::post('/guru/bank-soal/paket/{exam}/soal', [TeacherQuestionBankController::class, 'storePackageQuestion'])
         ->middleware('role:guru')
         ->name('teacher.question-bank.package.questions.store');

@@ -10,6 +10,8 @@ use ZipArchive;
 
 class ExamQuestionImporter
 {
+    public function __construct(private PdfExamQuestionParser $pdfParser) {}
+
     /**
      * @return array<int, array{prompt: string, type: string, options: array<string, string>|null, answer_key: string|null, sample_answer: string|null, points: int}>
      */
@@ -20,7 +22,7 @@ class ExamQuestionImporter
         return match ($extension) {
             'xlsx' => $this->importSpreadsheet($file->getRealPath()),
             'csv', 'txt' => $this->importCsv($file->getRealPath()),
-            'pdf' => $this->importPdf($file->getRealPath()),
+            'pdf' => $this->pdfParser->import($file->getRealPath()),
             default => throw new RuntimeException('Format file belum didukung. Gunakan Excel (.xlsx), CSV (.csv), TXT (.txt), atau PDF (.pdf).'),
         };
     }
@@ -195,15 +197,15 @@ class ExamQuestionImporter
             throw new RuntimeException('File harus memiliki baris judul kolom (header) dan minimal satu baris soal.');
         }
 
-        $headers = array_map(static fn (string $value): string => mb_strtolower(trim($value)), $rows[0]);
+        $headers = array_map(fn (string $value): string => $this->normalizeHeader($value), $rows[0]);
 
         $aliases = [
-            'question' => ['question', 'pertanyaan', 'soal', 'soal pertanyaan', 'isi soal'],
-            'A' => ['a', 'opsi a', 'pilihan a', 'opt a'],
-            'B' => ['b', 'opsi b', 'pilihan b', 'opt b'],
-            'C' => ['c', 'opsi c', 'pilihan c', 'opt c'],
-            'D' => ['d', 'opsi d', 'pilihan d', 'opt d'],
-            'answer' => ['answer', 'kunci', 'jawaban', 'kunci jawaban'],
+            'question' => ['question', 'question text', 'question_text', 'pertanyaan', 'soal', 'soal pertanyaan', 'isi soal', 'teks soal'],
+            'A' => ['a', 'opsi a', 'pilihan a', 'opt a', 'option a', 'option_a', 'choice a'],
+            'B' => ['b', 'opsi b', 'pilihan b', 'opt b', 'option b', 'option_b', 'choice b'],
+            'C' => ['c', 'opsi c', 'pilihan c', 'opt c', 'option c', 'option_c', 'choice c'],
+            'D' => ['d', 'opsi d', 'pilihan d', 'opt d', 'option d', 'option_d', 'choice d'],
+            'answer' => ['answer', 'answer key', 'answer_key', 'correct answer', 'kunci', 'jawaban', 'kunci jawaban'],
             'points' => ['points', 'poin', 'nilai', 'bobot'],
             'type' => ['type', 'jenis', 'tipe', 'tipe soal'],
             'sample_answer' => ['pedoman', 'pedoman_jawaban', 'kunci_esai', 'rubrik', 'sample_answer'],
@@ -211,8 +213,9 @@ class ExamQuestionImporter
 
         $columns = [];
         foreach ($aliases as $key => $names) {
+            $normalizedAliases = array_map(fn (string $name): string => $this->normalizeHeader($name), $names);
             foreach ($headers as $index => $header) {
-                if (in_array($header, $names, true)) {
+                if (in_array($header, $normalizedAliases, true)) {
                     $columns[$key] = $index;
                     break;
                 }
@@ -223,7 +226,7 @@ class ExamQuestionImporter
             throw new RuntimeException('Kolom "Pertanyaan" tidak ditemukan di baris pertama Excel/CSV. Periksa judul kolom Anda.');
         }
 
-        $hasMultipleChoiceOptions = array_key_exists('A', $columns) && array_key_exists('B', $columns) && array_key_exists('C', $columns) && array_key_exists('D', $columns);
+        $hasMultipleChoiceOptions = array_key_exists('A', $columns) && array_key_exists('B', $columns);
 
         $questions = [];
         foreach (array_slice($rows, 1) as $index => $row) {
@@ -258,7 +261,7 @@ class ExamQuestionImporter
                 ];
             } else {
                 if (! $hasMultipleChoiceOptions) {
-                    throw new RuntimeException('Soal Pilihan Ganda membutuhkan kolom: Pertanyaan, A, B, C, D, Kunci. Jika membuat soal esai, unduh template khusus Esai.');
+                    throw new RuntimeException('Soal pilihan ganda membutuhkan kolom Pertanyaan, A, B, dan Kunci. Kolom C dan D boleh kosong; soal esai dapat memakai kolom Pedoman Jawaban.');
                 }
 
                 $optA = $this->cell($row, $columns['A']);
@@ -297,139 +300,11 @@ class ExamQuestionImporter
         return $this->ensureQuestions($questions);
     }
 
-    /**
-     * Mengimpor soal dari dokumen PDF.
-     *
-     * @return array<int, array{prompt: string, type: string, options: array<string, string>|null, answer_key: string|null, sample_answer: string|null, points: int}>
-     */
-    private function importPdf(string|false $path): array
+    private function normalizeHeader(string $header): string
     {
-        if (! is_string($path) || ! file_exists($path)) {
-            throw new RuntimeException('File PDF tidak dapat dibaca.');
-        }
+        $header = mb_strtolower(trim($header));
 
-        $pdf = file_get_contents($path);
-        if (! is_string($pdf) || ! str_starts_with($pdf, '%PDF-')) {
-            throw new RuntimeException('File bukan dokumen PDF yang valid.');
-        }
-
-        $text = '';
-        $decodedBytes = 0;
-        preg_match_all('/stream\r?\n(.*?)\r?\nendstream/s', $pdf, $streams);
-        foreach ($streams[1] ?? [] as $stream) {
-            $stream = trim($stream, "\r\n");
-            $decoded = @gzuncompress($stream);
-            $stream = is_string($decoded) ? $decoded : $stream;
-            $decodedBytes += strlen($stream);
-            if ($decodedBytes > 25_000_000) {
-                throw new RuntimeException('Isi PDF terlalu besar untuk diproses.');
-            }
-            preg_match_all('/\((?:\\\\.|[^\\\\)])*\)\s*Tj|\[(.*?)\]\s*TJ/s', $stream, $matches);
-            foreach ($matches[0] ?? [] as $operator) {
-                preg_match_all('/\((?:\\\\.|[^\\\\)])*\)/s', $operator, $strings);
-                foreach ($strings[0] ?? [] as $literal) {
-                    $text .= ' '.$this->decodePdfLiteral(substr($literal, 1, -1));
-                }
-                $text .= "\n";
-            }
-        }
-
-        if (trim($text) === '') {
-            throw new RuntimeException('Teks PDF tidak terbaca. Pastikan teksnya bisa diseleksi, bukan hasil scan/foto. PDF hasil scan perlu OCR terlebih dahulu.');
-        }
-
-        $orderedQuestions = [];
-        $questionBlocks = [];
-        $currentBlock = null;
-
-        foreach (preg_split('/\R/u', $text) ?: [] as $line) {
-            $line = trim($line);
-
-            if (preg_match('/^(\d+)[.)]\s*(.*)$/u', $line, $questionStart) === 1) {
-                if ($currentBlock !== null) {
-                    $questionBlocks[] = $currentBlock;
-                }
-
-                $currentBlock = [
-                    'number' => (int) $questionStart[1],
-                    'lines' => [$questionStart[2]],
-                ];
-
-                continue;
-            }
-
-            if ($currentBlock !== null && $line !== '') {
-                $currentBlock['lines'][] = $line;
-            }
-        }
-
-        if ($currentBlock !== null) {
-            $questionBlocks[] = $currentBlock;
-        }
-
-        foreach ($questionBlocks as $block) {
-            $blockText = preg_replace('/\s+/u', ' ', implode(' ', $block['lines'])) ?? '';
-
-            if (str_starts_with(mb_strtoupper($blockText), '[ESAI]')
-                && preg_match('/^(\[ESAI\].*?\s+poin\s*:?\s*\d+)/iu', $blockText, $completeEssayBlock) === 1) {
-                $blockText = $completeEssayBlock[1];
-            } elseif (preg_match('/^(.+?\s+(?:kunci|jawaban)\s*:?\s*[A-D](?:\s+poin\s*:?\s*\d+)?)/iu', $blockText, $completeMultipleChoiceBlock) === 1) {
-                $blockText = $completeMultipleChoiceBlock[1];
-            }
-
-            if (preg_match('/^\[ESAI\]\s*(.+?)(?:\s+(?:pedoman(?:\s+jawaban)?|kunci\s+esai)\s*:\s*(.*?))?(?:\s+poin\s*:?\s*(\d+))?\s*$/iu', $blockText, $essayMatch) === 1) {
-                $orderedQuestions[] = [
-                    'number' => $block['number'],
-                    'question' => [
-                        'prompt' => trim($essayMatch[1]),
-                        'type' => ExamQuestion::TYPE_ESSAY,
-                        'options' => null,
-                        'answer_key' => null,
-                        'sample_answer' => isset($essayMatch[2]) && trim($essayMatch[2]) !== '' ? trim($essayMatch[2]) : null,
-                        'points' => isset($essayMatch[3]) && $essayMatch[3] !== '' ? max(1, min(100, (int) $essayMatch[3])) : 10,
-                    ],
-                ];
-
-                continue;
-            }
-
-            if (preg_match('/^(.+?)\s+A[.)]\s*(.+?)\s+B[.)]\s*(.+?)\s+C[.)]\s*(.+?)\s+D[.)]\s*(.+?)\s+(?:kunci|jawaban)\s*:?\s*([A-D])(?:\s+poin\s*:?\s*(\d+))?\s*$/iu', $blockText, $multipleChoiceMatch) === 1) {
-                $orderedQuestions[] = [
-                    'number' => $block['number'],
-                    'question' => [
-                        'prompt' => trim($multipleChoiceMatch[1]),
-                        'type' => ExamQuestion::TYPE_MULTIPLE_CHOICE,
-                        'options' => [
-                            'A' => trim($multipleChoiceMatch[2]),
-                            'B' => trim($multipleChoiceMatch[3]),
-                            'C' => trim($multipleChoiceMatch[4]),
-                            'D' => trim($multipleChoiceMatch[5]),
-                        ],
-                        'answer_key' => strtoupper(trim($multipleChoiceMatch[6])),
-                        'sample_answer' => null,
-                        'points' => isset($multipleChoiceMatch[7]) && $multipleChoiceMatch[7] !== '' ? max(1, min(100, (int) $multipleChoiceMatch[7])) : 10,
-                    ],
-                ];
-            }
-        }
-
-        if ($orderedQuestions === []) {
-            throw new RuntimeException('PDF terbaca, tetapi format soalnya belum sesuai. Ikuti format pada Template PDF: soal PG memakai pilihan A-D dan "Kunci: A"; soal esai memakai tanda [ESAI] dan "Pedoman Jawaban:".');
-        }
-
-        usort($orderedQuestions, static fn (array $first, array $second): int => $first['number'] <=> $second['number']);
-
-        return $this->ensureQuestions(array_map(static fn (array $item): array => $item['question'], $orderedQuestions));
-    }
-
-    private function decodePdfLiteral(string $literal): string
-    {
-        return preg_replace_callback('/\\\\([\\\\()nrtbf]|[0-7]{1,3}|\r?\n)/', static function (array $match): string {
-            return match ($match[1]) {
-                'n' => "\n", 'r' => "\r", 't' => "\t", 'b' => "\x08", 'f' => "\x0c",
-                default => ctype_digit($match[1]) ? chr(octdec($match[1]) % 256) : $match[1],
-            };
-        }, $literal) ?? $literal;
+        return trim(preg_replace('/[^\pL\pN]+/u', '_', $header) ?? $header, '_');
     }
 
     /**
@@ -439,10 +314,7 @@ class ExamQuestionImporter
     private function ensureQuestions(array $questions): array
     {
         if ($questions === []) {
-            throw new RuntimeException('Tidak ada butir soal yang terbaca dari file. Pastikan Anda menggunakan susunan kolom sesuai Template Excel yang disediakan.');
-        }
-        if (count($questions) > 100) {
-            throw new RuntimeException('Maksimal 100 soal per sesi ujian.');
+            throw new RuntimeException('Tidak ada soal yang berhasil dibaca. Pastikan setiap soal memiliki nomor, teks soal, dan susunan kolom atau label yang dikenali.');
         }
 
         return $questions;
